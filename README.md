@@ -207,7 +207,7 @@ python -m t2i.pipeline.generate \
 
 ---
 
-<div align="center">
-  <sub>Developed with ❤️ for resource-efficient, edge-first Computer Vision and Generative AI.</sub><br>
-  <sub>© 2026 Team Nexus</sub>
+<div>
+
+  © 2026 Team Nexus
 </div>

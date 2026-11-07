@@ -47,3 +47,5 @@ results/cv_gallery/
 Thumbs.db
 .vscode/
 .idea/
+
+.vercel

@@ -153,39 +153,37 @@ class Denoiser:
             for i, t in enumerate(self.scheduler.timesteps):
                 t_start = time.perf_counter()
 
-                # --- Step 1: Duplicate latents for CFG ---
-                # latent_model_input shape: [unet_batch, 4, H/8, W/8]
-                latent_model_input = (
-                    torch.cat([latents, latents], dim=0) if cfg_enabled else latents
-                )
-
-                # --- Step 2: Scale model input by the scheduler ---
-                # Different schedulers use different scaling conventions.
-                latent_model_input = self.scheduler.scale_model_input(latent_model_input, t)
+                # --- Step 1 & 2: Scale model input by the scheduler ---
                 unet_dtype = getattr(self.unet, "dtype", torch.float32)
-                latent_model_input = latent_model_input.to(dtype=unet_dtype)
+                latent_single = self.scheduler.scale_model_input(latents, t).to(dtype=unet_dtype)
                 text_embeddings = text_embeddings.to(dtype=unet_dtype)
 
-                # --- Step 3: U-Net forward pass ---
-                # noise_pred shape: [unet_batch, 4, H/8, W/8]
-                noise_pred = self.unet(
-                    latent_model_input,
-                    t,
-                    encoder_hidden_states=text_embeddings,
-                    return_dict=False,
-                )[0]
-
-                # --- Steps 4 & 5: Split and apply guidance ---
+                # --- Step 3, 4 & 5: U-Net forward pass & Guidance ---
                 if cfg_enabled:
-                    # noise_pred_uncond: [1, 4, H/8, W/8]
-                    # noise_pred_cond:   [1, 4, H/8, W/8]
-                    noise_pred_uncond, noise_pred_cond = noise_pred.chunk(2, dim=0)
-                    # Guidance formula: uncond + scale * (cond - uncond)
+                    # Sequential evaluation (batch=1) halves peak activation memory to stay well within 4GB VRAM
+                    emb_uncond, emb_cond = text_embeddings.chunk(2, dim=0)
+                    noise_pred_uncond = self.unet(
+                        latent_single,
+                        t,
+                        encoder_hidden_states=emb_uncond,
+                        return_dict=False,
+                    )[0]
+                    noise_pred_cond = self.unet(
+                        latent_single,
+                        t,
+                        encoder_hidden_states=emb_cond,
+                        return_dict=False,
+                    )[0]
                     noise_pred = noise_pred_uncond + guidance_scale * (
                         noise_pred_cond - noise_pred_uncond
                     )
-                # When guidance_scale == 1.0, noise_pred is already cond-only;
-                # no arithmetic needed.
+                else:
+                    noise_pred = self.unet(
+                        latent_single,
+                        t,
+                        encoder_hidden_states=text_embeddings,
+                        return_dict=False,
+                    )[0]
 
                 # --- Step 6: Scheduler step ---
                 latents = self.scheduler.step(noise_pred, t, latents, return_dict=False)[0]
@@ -339,14 +337,23 @@ def load_denoiser(
         else:
             w_file = weights_fp16
 
-        logger.info("Loading U-Net from %s using meta-device allocation...", w_file)
+        logger.info("Loading U-Net from %s using streaming meta-device allocation...", w_file)
         with torch.device("meta"):
             unet = UNet2DConditionModel(**cfg_dict)
-        import safetensors.torch
+        from safetensors import safe_open
+        from accelerate.utils import set_module_tensor_to_device
 
-        sd = safetensors.torch.load_file(str(w_file), device=str(device))
-        unet.load_state_dict(sd, assign=True)
-        del sd
+        target_dev = str(device)
+        with safe_open(str(w_file), framework="numpy") as f:
+            for name in f.keys():
+                t = torch.from_numpy(f.get_tensor(name))
+                set_module_tensor_to_device(
+                    unet,
+                    tensor_name=name,
+                    device=target_dev,
+                    value=t,
+                    dtype=dtype,
+                )
     else:
         use_variant = (
             "fp16" if (target_dir / "diffusion_pytorch_model.fp16.safetensors").exists() else None

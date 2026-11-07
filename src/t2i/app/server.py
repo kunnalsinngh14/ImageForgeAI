@@ -350,101 +350,502 @@ def generate_image_ui(
 # ---------------------------------------------------------------------------
 
 CUSTOM_CSS = """
-/* Reset & Base Fonts */
+/* ==========================================================================
+   Apple Pro Studio Monochromatic Workstation Theme & Motion Suite
+   Zero gradients · Zero purple/violet · Deep blacks · Tactile micro-motion
+   ========================================================================== */
+
 :root {
-    --bg-ground: #0d1117;
-    --bg-surface: #161b22;
-    --bg-surface-elevated: #21262d;
-    --border-color: #30363d;
-    --border-subtle: #21262d;
-    --text-ink: #f0f6fc;
-    --text-muted: #8b949e;
-    --text-faint: #484f58;
-    --accent-orange: #ea580c;
-    --accent-hover: #f97316;
+    --canvas-bg: #000000;
+    --panel-bg: rgba(20, 24, 32, 0.65);
+    --panel-surface: #0e1117;
+    --panel-border: rgba(255, 255, 255, 0.08);
+    --panel-border-focus: rgba(255, 255, 255, 0.32);
+    --input-bg: #090b0f;
+    --text-primary: #f5f5f7;
+    --text-secondary: #86868b;
+    --text-tertiary: #515154;
+    --accent-btn-bg: #ffffff;
+    --accent-btn-text: #000000;
+    --accent-btn-hover: #f0f0f2;
+    --accent-pill-active: rgba(255, 255, 255, 0.12);
+    --accent-pill-border: rgba(255, 255, 255, 0.22);
+    
+    /* Neutralize all Gradio default purple/violet/indigo palette */
+    --primary-50: #f5f5f7;
+    --primary-100: #e5e5ea;
+    --primary-200: #d1d1d6;
+    --primary-300: #c7c7cc;
+    --primary-400: #aeaeb2;
+    --primary-500: #ffffff;
+    --primary-600: #f5f5f7;
+    --primary-700: #e5e5ea;
+    --primary-800: #d1d1d6;
+    --primary-900: #1c1c1e;
+    --primary-950: #000000;
+    --color-indigo-500: #ffffff;
+    --color-violet-500: #ffffff;
+    --color-purple-500: #ffffff;
+    --ring-color: rgba(255, 255, 255, 0.25) !important;
 }
 
-body, .gradio-container {
-    background-color: var(--bg-ground) !important;
-    color: var(--text-ink) !important;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif !important;
+/* ==========================================================================
+   Full-Viewport Monochromatic Architectural Ambient Aurora
+   Off-thread GPU composite · Zero CPU overhead · 22s whisper breathing drift
+   ========================================================================== */
+
+body {
+    position: relative;
+    background-color: var(--canvas-bg) !important;
+    overflow-x: hidden;
+    color: var(--text-primary) !important;
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif !important;
     -webkit-font-smoothing: antialiased;
+    letter-spacing: -0.01em;
 }
 
-/* App Header */
+body::before,
+body::after {
+    content: "";
+    position: fixed;
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 0;
+    will-change: transform, opacity;
+}
+
+/* Primary Ambient Aurora Orb (Top-Right Silver Luminescence) */
+body::before {
+    top: -15vh;
+    right: -5vw;
+    width: 60vw;
+    height: 60vw;
+    background: radial-gradient(
+        circle,
+        rgba(255, 255, 255, 0.16) 0%,
+        rgba(210, 225, 245, 0.08) 35%,
+        rgba(150, 175, 210, 0.03) 60%,
+        transparent 75%
+    );
+    filter: blur(48px);
+    animation: auroraDriftOne 13s cubic-bezier(0.4, 0, 0.2, 1) infinite alternate;
+}
+
+/* Secondary Ambient Aurora Orb (Bottom-Left Deep Slate Drift) */
+body::after {
+    bottom: -20vh;
+    left: -10vw;
+    width: 70vw;
+    height: 70vw;
+    background: radial-gradient(
+        circle,
+        rgba(255, 255, 255, 0.13) 0%,
+        rgba(180, 200, 230, 0.06) 40%,
+        rgba(120, 140, 180, 0.02) 65%,
+        transparent 80%
+    );
+    filter: blur(56px);
+    animation: auroraDriftTwo 17s cubic-bezier(0.4, 0, 0.2, 1) infinite alternate;
+}
+
+@keyframes auroraDriftOne {
+    0% {
+        transform: translate3d(0, 0, 0) scale(1);
+        opacity: 0.75;
+    }
+    50% {
+        transform: translate3d(-10vw, 12vh, 0) scale(1.18);
+        opacity: 1;
+    }
+    100% {
+        transform: translate3d(6vw, 8vh, 0) scale(0.92);
+        opacity: 0.85;
+    }
+}
+
+@keyframes auroraDriftTwo {
+    0% {
+        transform: translate3d(0, 0, 0) scale(1);
+        opacity: 0.7;
+    }
+    50% {
+        transform: translate3d(12vw, -10vh, 0) scale(1.22);
+        opacity: 1;
+    }
+    100% {
+        transform: translate3d(-6vw, -6vh, 0) scale(0.9);
+        opacity: 0.8;
+    }
+}
+
+.gradio-container {
+    position: relative;
+    z-index: 1;
+    background-color: transparent !important;
+}
+
+/* App Header - Precision Workstation Style */
 .app-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 14px 20px;
-    background: var(--bg-surface);
-    border: 1px solid var(--border-color);
-    border-radius: 8px;
+    padding: 16px 24px;
+    background: var(--panel-bg);
+    backdrop-filter: blur(24px) saturate(180%);
+    -webkit-backdrop-filter: blur(24px) saturate(180%);
+    border: 1px solid var(--panel-border);
+    border-radius: 10px;
     margin-bottom: 16px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
 }
 
-.app-brand {
+/* Portfolio-Caliber Brand Identity */
+.app-brand-portfolio {
     display: flex;
-    align-items: baseline;
-    gap: 12px;
+    align-items: center;
+    gap: 16px;
+    cursor: default;
+    user-select: none;
 }
 
-.app-name {
-    font-size: 18px;
-    font-weight: 600;
-    color: var(--text-ink);
-    letter-spacing: -0.01em;
-    margin: 0;
+.brand-glyph-box {
+    position: relative;
+    width: 38px;
+    height: 38px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-radius: 9px;
+    transition: transform 300ms cubic-bezier(0.16, 1, 0.3, 1), border-color 300ms ease;
 }
 
-.app-desc {
-    font-size: 13px;
-    color: var(--text-muted);
-    margin: 0;
+.brand-glyph {
+    width: 22px;
+    height: 22px;
+    color: #ffffff;
+    filter: drop-shadow(0 0 6px rgba(255, 255, 255, 0.45));
+    transition: transform 500ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.hw-tag {
-    font-size: 12px;
-    font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
-    color: var(--text-muted);
-    background: var(--bg-ground);
-    border: 1px solid var(--border-color);
-    border-radius: 6px;
-    padding: 4px 10px;
+.glyph-glow {
+    position: absolute;
+    inset: -3px;
+    border-radius: 11px;
+    background: radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.18), transparent 70%);
+    opacity: 0;
+    transition: opacity 300ms ease;
+    pointer-events: none;
 }
 
-/* Primary Button - Flat, crisp, confident */
+.app-brand-portfolio:hover .brand-glyph-box {
+    transform: scale(1.06);
+    border-color: rgba(255, 255, 255, 0.4);
+}
+
+.app-brand-portfolio:hover .brand-glyph {
+    transform: rotate(30deg);
+}
+
+.app-brand-portfolio:hover .glyph-glow {
+    opacity: 1;
+}
+
+.brand-text-col {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.brand-title-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* Flashy Portfolio Typography with Liquid Chrome Glint */
+@keyframes chromeShine {
+    0% {
+        background-position: -200% 0;
+    }
+    100% {
+        background-position: 200% 0;
+    }
+}
+
+.portfolio-logo {
+    font-size: 21px;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    background: linear-gradient(
+        105deg,
+        rgba(255, 255, 255, 0.45) 0%,
+        rgba(255, 255, 255, 0.5) 25%,
+        #ffffff 50%,
+        rgba(255, 255, 255, 0.5) 75%,
+        rgba(255, 255, 255, 0.45) 100%
+    );
+    background-size: 250% 100%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: chromeShine 3.2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+    transition: letter-spacing 300ms cubic-bezier(0.16, 1, 0.3, 1), filter 300ms ease;
+    display: inline-block;
+}
+
+.portfolio-logo .logo-accent {
+    font-weight: 300;
+    letter-spacing: 0.08em;
+    -webkit-text-fill-color: inherit;
+    text-shadow: 0 0 16px rgba(255, 255, 255, 0.5);
+}
+
+.app-brand-portfolio:hover .portfolio-logo {
+    letter-spacing: 0.06em;
+    filter: drop-shadow(0 0 18px rgba(255, 255, 255, 0.45));
+}
+
+.portfolio-badge {
+    font-size: 9.5px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #000000;
+    background: #ffffff;
+    border-radius: 4px;
+    padding: 2px 6px;
+    box-shadow: 0 1px 4px rgba(255, 255, 255, 0.25);
+    line-height: 1.2;
+}
+
+.brand-sub-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 11px;
+}
+
+.portfolio-meta {
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    color: #86868b;
+    text-transform: uppercase;
+}
+
+.meta-dot {
+    color: rgba(255, 255, 255, 0.2);
+}
+
+.portfolio-desc {
+    color: #a1a1aa;
+    font-size: 11.5px;
+}
+
+/* Portfolio Hardware Pill with Active Radar Ping */
+.hw-tag-portfolio {
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    font-size: 11.5px;
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    color: var(--text-secondary);
+    background: #090b0f;
+    border: 1px solid var(--panel-border);
+    border-radius: 20px;
+    padding: 5px 14px;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+.hw-beacon {
+    position: relative;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #10b981;
+    box-shadow: 0 0 8px #10b981;
+    display: inline-block;
+}
+
+.hw-beacon::after {
+    content: "";
+    position: absolute;
+    inset: -2px;
+    border-radius: 50%;
+    border: 1.5px solid #10b981;
+    animation: beaconPing 2s cubic-bezier(0, 0, 0.2, 1) infinite;
+}
+
+@keyframes beaconPing {
+    0% {
+        transform: scale(0.9);
+        opacity: 0.9;
+    }
+    70%, 100% {
+        transform: scale(2.6);
+        opacity: 0;
+    }
+}
+
+/* Primary Action Button - Apple Monochrome Studio (Crisp solid white, bold black text, physical spring press) */
 .primary-action-btn {
-    background: var(--accent-orange) !important;
-    color: #ffffff !important;
-    font-weight: 500 !important;
-    font-size: 14px !important;
-    border: 1px solid #c2410c !important;
+    background: var(--accent-btn-bg) !important;
+    color: var(--accent-btn-text) !important;
+    font-weight: 600 !important;
+    font-size: 13.5px !important;
+    letter-spacing: -0.01em !important;
+    border: 1px solid rgba(255, 255, 255, 0.9) !important;
     border-radius: 6px !important;
     padding: 10px 18px !important;
-    box-shadow: none !important;
     cursor: pointer !important;
-    transition: background-color 100ms ease, transform 60ms ease !important;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.9) !important;
+    transition: transform 90ms cubic-bezier(0.2, 0.8, 0.2, 1), background-color 140ms ease, box-shadow 140ms ease !important;
 }
 
 .primary-action-btn:hover {
-    background: var(--accent-hover) !important;
-    box-shadow: none !important;
+    background: var(--accent-btn-hover) !important;
+    box-shadow: 0 2px 8px rgba(255, 255, 255, 0.15), inset 0 1px 0 rgba(255, 255, 255, 1) !important;
 }
 
 .primary-action-btn:active {
     transform: scale(0.98) !important;
+    background: #e2e2e5 !important;
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.2) !important;
 }
 
-/* Status Monitor Bar */
-.status-monitor {
-    background: var(--bg-ground) !important;
-    border: 1px solid var(--border-color) !important;
+/* Form Controls - Subtle hairline borders, zero neon, high-contrast crisp text */
+textarea, input[type="text"], input[type="number"], select {
+    background-color: var(--input-bg) !important;
+    border: 1px solid var(--panel-border) !important;
     border-radius: 6px !important;
-    color: var(--text-muted) !important;
+    color: var(--text-primary) !important;
     font-size: 13px !important;
-    font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace !important;
+    transition: border-color 150ms ease, box-shadow 150ms ease !important;
+}
+
+textarea:focus, input:focus, select:focus {
+    border-color: var(--panel-border-focus) !important;
+    box-shadow: 0 0 0 1px var(--panel-border-focus) !important;
+    outline: none !important;
+}
+
+/* Segmented Control Styling for Mode Selector (Apple macOS segmented pill style) */
+.gradio-radio .wrap {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 4px !important;
+    background: rgba(255, 255, 255, 0.04) !important;
+    border: 1px solid var(--panel-border) !important;
+    border-radius: 8px !important;
+    padding: 4px !important;
+}
+
+.gradio-radio label {
+    display: flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    padding: 6px 14px !important;
+    border-radius: 6px !important;
+    font-size: 12.5px !important;
+    font-weight: 500 !important;
+    color: var(--text-secondary) !important;
+    cursor: pointer !important;
+    border: 1px solid transparent !important;
+    background: transparent !important;
+    transition: all 120ms cubic-bezier(0.2, 0.8, 0.2, 1) !important;
+}
+
+.gradio-radio label:hover {
+    color: var(--text-primary) !important;
+    background: rgba(255, 255, 255, 0.05) !important;
+}
+
+.gradio-radio label.selected,
+.gradio-radio label:has(input:checked) {
+    background: var(--accent-pill-active) !important;
+    color: #ffffff !important;
+    border-color: var(--accent-pill-border) !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3) !important;
+}
+
+.gradio-radio input[type="radio"] {
+    appearance: none !important;
+    -webkit-appearance: none !important;
+    width: 0 !important;
+    height: 0 !important;
+    margin: 0 !important;
+    opacity: 0 !important;
+    position: absolute !important;
+}
+
+/* Slider Neutral Apple Styling */
+input[type="range"] {
+    accent-color: #ffffff !important;
+}
+
+/* Status Monitor Bar with ambient breathing state indicator */
+.status-monitor {
+    background: var(--input-bg) !important;
+    border: 1px solid var(--panel-border) !important;
+    border-radius: 6px !important;
+    color: var(--text-secondary) !important;
+    font-size: 12px !important;
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace !important;
     padding: 8px 12px !important;
+    transition: border-color 200ms ease, box-shadow 200ms ease !important;
+}
+
+.status-monitor textarea {
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace !important;
+    font-size: 12px !important;
+    color: var(--text-secondary) !important;
+}
+
+@keyframes appleBreathingGlow {
+    0%, 100% {
+        border-color: rgba(255, 255, 255, 0.08);
+        box-shadow: 0 0 0 0 rgba(255, 255, 255, 0);
+    }
+    50% {
+        border-color: rgba(255, 255, 255, 0.28);
+        box-shadow: 0 0 12px 0 rgba(255, 255, 255, 0.06);
+    }
+}
+
+.status-monitor:focus-within {
+    animation: appleBreathingGlow 2.4s ease-in-out infinite !important;
+}
+
+/* Image Output Canvas & Physical Entrance Reveal Animation */
+.apple-image-canvas,
+.gradio-image {
+    background: #07080a !important;
+    border: 1px solid var(--panel-border) !important;
+    border-radius: 8px !important;
+    overflow: hidden !important;
+    transition: border-color 150ms ease !important;
+}
+
+@keyframes appleReveal {
+    0% {
+        opacity: 0;
+        transform: scale(0.985);
+        filter: blur(2px);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1);
+        filter: blur(0);
+    }
+}
+
+.apple-image-canvas img,
+.image-reveal img,
+.gradio-image img {
+    animation: appleReveal 280ms cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
+    border-radius: 6px !important;
 }
 
 /* Telemetry & Stage Timings */
@@ -453,45 +854,47 @@ body, .gradio-container {
     flex-wrap: wrap;
     align-items: center;
     gap: 8px;
-    padding: 8px 12px;
-    background: var(--bg-surface);
-    border: 1px solid var(--border-color);
+    padding: 8px 14px;
+    background: var(--panel-bg);
+    border: 1px solid var(--panel-border);
     border-radius: 6px;
     font-size: 12px;
-    font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    font-variant-numeric: tabular-nums;
     margin-top: 8px;
 }
 
 .telemetry-item {
     display: inline-flex;
-    gap: 4px;
+    gap: 5px;
 }
 
 .telemetry-k {
-    color: var(--text-muted);
+    color: var(--text-secondary);
 }
 
 .telemetry-v {
-    color: var(--text-ink);
+    color: #ffffff;
     font-weight: 500;
 }
 
 .telemetry-sep {
-    color: var(--border-color);
+    color: var(--panel-border);
 }
 
 .stage-timing-row {
     display: flex;
-    gap: 14px;
+    gap: 16px;
     font-size: 11px;
-    color: var(--text-faint);
-    font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+    color: var(--text-tertiary);
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    font-variant-numeric: tabular-nums;
     padding: 4px 6px;
 }
 
-/* Tabs */
+/* Tabs - Apple macOS Segmented Header */
 .tab-nav {
-    border-bottom: 1px solid var(--border-color) !important;
+    border-bottom: 1px solid var(--panel-border) !important;
     margin-bottom: 16px !important;
 }
 
@@ -499,14 +902,19 @@ body, .gradio-container {
     font-size: 13px !important;
     font-weight: 500 !important;
     padding: 8px 16px !important;
-    color: var(--text-muted) !important;
+    color: var(--text-secondary) !important;
     border: none !important;
     background: transparent !important;
+    transition: color 140ms ease, border-color 140ms ease !important;
+}
+
+.tab-nav button:hover {
+    color: var(--text-primary) !important;
 }
 
 .tab-nav button.selected {
-    color: var(--text-ink) !important;
-    border-bottom: 2px solid var(--accent-orange) !important;
+    color: #ffffff !important;
+    border-bottom: 2px solid #ffffff !important;
     background: transparent !important;
 }
 
@@ -514,8 +922,9 @@ body, .gradio-container {
 .stat-strip {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-    background: var(--bg-surface);
-    border: 1px solid var(--border-color);
+    background: var(--panel-bg);
+    backdrop-filter: blur(24px) saturate(180%);
+    border: 1px solid var(--panel-border);
     border-radius: 8px;
     margin-bottom: 20px;
     overflow: hidden;
@@ -523,7 +932,7 @@ body, .gradio-container {
 
 .stat-cell {
     padding: 16px 20px;
-    border-right: 1px solid var(--border-color);
+    border-right: 1px solid var(--panel-border);
 }
 
 .stat-cell:last-child {
@@ -531,38 +940,42 @@ body, .gradio-container {
 }
 
 .stat-label {
-    font-size: 12px;
-    color: var(--text-muted);
+    font-size: 11px;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
     margin-bottom: 4px;
 }
 
 .stat-value {
     font-size: 24px;
     font-weight: 600;
-    color: var(--text-ink);
-    font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+    color: #ffffff;
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    font-variant-numeric: tabular-nums;
     letter-spacing: -0.02em;
 }
 
 .stat-context {
-    font-size: 12px;
-    color: var(--text-faint);
+    font-size: 11.5px;
+    color: var(--text-tertiary);
     margin-top: 4px;
 }
 
 /* Comparison Container */
 .benchmark-container {
-    background: var(--bg-surface);
-    border: 1px solid var(--border-color);
+    background: var(--panel-bg);
+    border: 1px solid var(--panel-border);
     border-radius: 8px;
     padding: 18px 20px;
     margin-bottom: 18px;
 }
 
 .benchmark-heading {
-    font-size: 14px;
+    font-size: 13.5px;
     font-weight: 600;
-    color: var(--text-ink);
+    color: #ffffff;
+    letter-spacing: -0.01em;
     margin-bottom: 14px;
 }
 
@@ -579,35 +992,35 @@ body, .gradio-container {
 
 .benchmark-track {
     width: 100%;
-    height: 8px;
-    background: var(--bg-ground);
-    border: 1px solid var(--border-color);
-    border-radius: 4px;
+    height: 6px;
+    background: var(--input-bg);
+    border: 1px solid var(--panel-border);
+    border-radius: 3px;
     overflow: hidden;
 }
 
 .benchmark-fill-orange {
     height: 100%;
-    background: var(--accent-orange);
-    border-radius: 3px;
+    background: #ffffff;
+    border-radius: 2px;
 }
 
 .benchmark-fill-green {
     height: 100%;
-    background: #16a34a;
-    border-radius: 3px;
+    background: #10b981;
+    border-radius: 2px;
 }
 
 .benchmark-fill-neutral {
     height: 100%;
-    background: #484f58;
-    border-radius: 3px;
+    background: #515154;
+    border-radius: 2px;
 }
 
 .benchmark-fill-red {
     height: 100%;
-    background: #dc2626;
-    border-radius: 3px;
+    background: #ef4444;
+    border-radius: 2px;
 }
 
 /* Clean Ruled Table */
@@ -621,33 +1034,91 @@ body, .gradio-container {
 .data-table th {
     text-align: left;
     padding: 8px 12px;
-    font-size: 12px;
+    font-size: 11.5px;
     font-weight: 500;
-    color: var(--text-muted);
-    border-bottom: 1px solid var(--border-color);
+    color: var(--text-secondary);
+    border-bottom: 1px solid var(--panel-border);
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
 }
 
 .data-table td {
     padding: 10px 12px;
-    border-bottom: 1px solid var(--border-subtle);
-    color: var(--text-ink);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+    color: var(--text-primary);
 }
 
 .data-table td.num {
     text-align: right;
-    font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    font-variant-numeric: tabular-nums;
 }
 
 .data-table th.num {
     text-align: right;
 }
 
-/* Footer */
-.clean-footer {
-    text-align: center;
-    padding: 24px 0 12px 0;
-    color: var(--text-faint);
-    font-size: 12px;
+/* Accessibility: Reduced motion query */
+@media (prefers-reduced-motion: reduce) {
+    *, ::before, ::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+}
+
+/* Image Canvas Toolbar & Download Button */
+.apple-image-canvas button,
+.apple-image-canvas a[download],
+.apple-image-canvas [aria-label*="Download"],
+.apple-image-canvas [aria-label*="download"],
+.apple-image-canvas [title*="Download"],
+.apple-image-canvas [title*="download"],
+.gradio-image button,
+.gradio-image a[download] {
+    display: inline-flex !important;
+    visibility: visible !important;
+    opacity: 0.9 !important;
+    pointer-events: auto !important;
+    background: rgba(20, 24, 32, 0.85) !important;
+    backdrop-filter: blur(12px) !important;
+    border: 1px solid rgba(255, 255, 255, 0.16) !important;
+    border-radius: 6px !important;
+    color: #ffffff !important;
+    transition: opacity 120ms ease, background-color 120ms ease, transform 80ms ease !important;
+}
+
+.apple-image-canvas button:hover,
+.apple-image-canvas a[download]:hover {
+    opacity: 1 !important;
+    background: rgba(35, 42, 55, 0.95) !important;
+    border-color: rgba(255, 255, 255, 0.35) !important;
+}
+
+.apple-image-canvas button:active,
+.apple-image-canvas a[download]:active {
+    transform: scale(0.96) !important;
+}
+
+/* Complete Footer, API links, and Settings Removal */
+footer,
+body footer,
+.gradio-container footer,
+div footer,
+a[href*="gradio.app"],
+footer a,
+[data-testid="show-api"],
+.show-api {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    height: 0 !important;
+    max-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+    pointer-events: none !important;
 }
 """
 
@@ -665,16 +1136,39 @@ def build_app() -> gr.Blocks:
         else "CPU (4-Thread Proxy)"
     )
 
-    with gr.Blocks(title="ImageForge — Text-to-Image Pipeline", css=CUSTOM_CSS) as demo:
-        # App Header
+    with gr.Blocks(title="ImageForge — Text-to-Image Pipeline") as demo:
+        # App Header - Portfolio-grade kinetic brand identity
         gr.HTML(
             f"""
             <header class="app-header">
-                <div class="app-brand">
-                    <span class="app-name">ImageForge</span>
-                    <span class="app-desc">Resource-efficient text-to-image synthesis pipeline</span>
+                <div class="app-brand-portfolio">
+                    <div class="brand-glyph-box">
+                        <svg class="brand-glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                            <polygon points="12 2 22 8.5 22 15.5 12 22 2 15.5 2 8.5 12 2"></polygon>
+                            <circle cx="12" cy="12" r="3.5" fill="currentColor"></circle>
+                            <line x1="12" y1="2" x2="12" y2="8.5"></line>
+                            <line x1="12" y1="22" x2="12" y2="15.5"></line>
+                            <line x1="2" y1="8.5" x2="8" y2="12"></line>
+                            <line x1="22" y1="15.5" x2="16" y2="12"></line>
+                        </svg>
+                        <div class="glyph-glow"></div>
+                    </div>
+                    <div class="brand-text-col">
+                        <div class="brand-title-row">
+                            <span class="portfolio-logo">IMAGE<span class="logo-accent">FORGE</span></span>
+                            <span class="portfolio-badge">PRO · STUDIO</span>
+                        </div>
+                        <div class="brand-sub-row">
+                            <span class="portfolio-meta">NEURAL SYNTHESIS WORKSTATION</span>
+                            <span class="meta-dot">·</span>
+                            <span class="portfolio-desc">Adaptive 4GB VRAM Pipeline</span>
+                        </div>
+                    </div>
                 </div>
-                <div class="hw-tag">{device_label}</div>
+                <div class="hw-tag-portfolio">
+                    <span class="hw-beacon"></span>
+                    <span class="hw-text">{device_label}</span>
+                </div>
             </header>
             """
         )
@@ -786,11 +1280,13 @@ def build_app() -> gr.Blocks:
                             label="Output",
                             type="pil",
                             interactive=False,
+                            buttons=["download", "fullscreen"],
+                            elem_classes=["apple-image-canvas", "image-reveal"],
                         )
 
                         metrics_output = gr.HTML(
                             label="Metrics",
-                            value="<p style='color:#484f58; font-size:12px; margin:4px 0;'>Inference telemetry will display after execution.</p>",
+                            value="<p style='color:#515154; font-size:12px; margin:4px 0;'>Inference telemetry will display after execution.</p>",
                         )
 
                         with gr.Accordion("Compare with raw neural output (pre-filtering)", open=False):
@@ -798,6 +1294,8 @@ def build_app() -> gr.Blocks:
                                 label="Raw VAE output (before classical CV)",
                                 type="pil",
                                 interactive=False,
+                                buttons=["download", "fullscreen"],
+                                elem_classes=["apple-image-canvas", "image-reveal"],
                             )
 
             # -------------------------------------------------------------
@@ -990,14 +1488,6 @@ def build_app() -> gr.Blocks:
             ],
         )
 
-        gr.HTML(
-            """
-            <footer class="clean-footer">
-                ImageForge · Team Nexus · PES University
-            </footer>
-            """
-        )
-
     return demo
 
 
@@ -1018,7 +1508,13 @@ def main():
         format="%(asctime)s %(levelname)s %(name)s: %(message)s",
     )
     app = build_app()
-    app.launch(server_name="127.0.0.1", server_port=args.port, share=args.share)
+    app.launch(
+        server_name="127.0.0.1",
+        server_port=args.port,
+        share=args.share,
+        footer_links=[],
+        css=CUSTOM_CSS,
+    )
 
 
 if __name__ == "__main__":

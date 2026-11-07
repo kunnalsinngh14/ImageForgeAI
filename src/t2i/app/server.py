@@ -1,14 +1,12 @@
 """
-t2i.app.server — Production-ready local Web UI and API for ImageForgeAI.
+t2i.app.server — Production local Web UI and API for ImageForgeAI.
 
-Key Features & Architectural Highlights:
-- High-performance, resource-constrained text-to-image synthesis studio.
-- 100% on-device local execution (GPU/CUDA accelerated or 4-thread CPU mobile proxy).
-- Streamlined Studio interface with intuitive Generation Mode cards (Adaptive, Optimized, Baseline).
-- Collapsible Advanced Studio Controls (Negative prompt, Seed, Steps, CFG, Model Variant, CV toggle).
-- Large output canvas with download action, real-time status streaming, and Before/After CV comparison.
-- Dedicated Performance Dashboard with verified quantitative benchmarks and architecture comparisons.
-- Deep Diagnostics tab exposing non-reference CV quality metrics (BRISQUE, NIQE, Laplacian) and fallback logs.
+Built according to design engineering standards:
+- True neutral dark palette (#0d1117 / #161b22 / #21262d / #30363d).
+- Color on data, not on chrome (under 4% colored pixels).
+- Strict elimination of AI tells (no emojis, no gradient text, no glowing drop shadows, no pulse dots).
+- Flat opaque surfaces, 1px rules, tabular figures, and honest measured metrics.
+- Retains 100% of pipeline optimizations, models, and adaptive fallback capabilities.
 """
 
 from __future__ import annotations
@@ -35,7 +33,7 @@ from t2i.pipeline.generate import Generator
 logger = logging.getLogger(__name__)
 
 # ---------------------------------------------------------------------------
-# CPU thread cap — match mobile proxy (4 cores)
+# Thread configuration
 # ---------------------------------------------------------------------------
 torch.set_num_threads(4)
 logger.info("torch CPU threads set to 4")
@@ -178,7 +176,6 @@ def generate_image_ui(
     except Exception:
         res_w, res_h = 512, 512
 
-    # If seed is -1 or negative, generate a pseudorandom seed
     if seed < 0:
         import random
         effective_seed = random.randint(1, 999999)
@@ -191,7 +188,7 @@ def generate_image_ui(
         "",
         "",
         "",
-        f"⏳ Initializing generation ({mode.capitalize()} mode, {res_w}×{res_h}, {steps} steps)…",
+        f"Initializing {mode} pipeline ({res_w}×{res_h}, {steps} steps)…",
     )
 
     try:
@@ -209,7 +206,7 @@ def generate_image_ui(
             variant=variant,
         )
     except Exception as exc:
-        yield None, None, "", "", "", f"❌ Configuration error: {exc}"
+        yield None, None, "", "", "", f"Configuration error: {exc}"
         return
 
     num_steps = int(cfg.steps)
@@ -218,8 +215,8 @@ def generate_image_ui(
         None,
         "",
         "",
-        "\n".join(fallback_notes) if fallback_notes else "Ready (Normal execution)",
-        f"⚙️ Config resolved ({cfg.variant}, {cfg.scheduler}, {num_steps} steps). Loading pipeline…",
+        "\n".join(fallback_notes) if fallback_notes else "Ready",
+        f"Loading weights ({cfg.variant}, {cfg.scheduler})…",
     )
 
     status_q: queue.Queue = queue.Queue()
@@ -228,7 +225,7 @@ def generate_image_ui(
     def _worker():
         try:
             with _generator_lock:
-                status_q.put(("status", "🔤 Projecting prompt text embeddings (CLIP ViT-L/14)…"))
+                status_q.put(("status", "Encoding prompt (CLIP ViT-L/14)…"))
                 gen = _get_or_create_generator(cfg)
 
                 step_times_seen: list[float] = []
@@ -244,8 +241,7 @@ def generate_image_ui(
                     status_q.put(
                         (
                             "status",
-                            f"🎨 Reverse diffusion step {step_idx + 1}/{num_steps} ({pct}%) "
-                            f"— {elapsed:.2f}s/step (~{remaining:.1f}s remaining)…",
+                            f"Step {step_idx + 1}/{num_steps} ({pct}%) — {elapsed:.2f}s/step (~{remaining:.1f}s remaining)",
                         )
                     )
                     return False
@@ -259,7 +255,7 @@ def generate_image_ui(
             result_holder.append(result)
             status_q.put((_DONE, result))
         except Exception as exc:
-            logger.exception("Generation worker crashed")
+            logger.exception("Generation worker failed")
             result_holder.append(exc)
             status_q.put((_ERROR, exc))
 
@@ -271,7 +267,7 @@ def generate_image_ui(
             msg_type, payload = status_q.get(timeout=0.4)
         except queue.Empty:
             if not worker_thread.is_alive() and status_q.empty():
-                yield None, None, "", "", "", "❌ Generation thread exited unexpectedly."
+                yield None, None, "", "", "", "Generation thread terminated unexpectedly."
                 return
             yield (
                 None,
@@ -279,7 +275,7 @@ def generate_image_ui(
                 "",
                 "",
                 "\n".join(fallback_notes) if fallback_notes else "None",
-                "⏳ Generating image in background thread…",
+                "Generating latents…",
             )
             continue
 
@@ -296,7 +292,7 @@ def generate_image_ui(
 
         if msg_type is _ERROR:
             err = payload
-            yield None, None, "", "", "", f"❌ Generation error: {err}"
+            yield None, None, "", "", "", f"Error: {err}"
             return
 
         if msg_type is _DONE:
@@ -310,40 +306,23 @@ def generate_image_ui(
         + result.time_postprocess_s
     )
 
-    # Format telemetry metadata chips
     metrics_html = f"""
-    <div class="metrics-bar-container">
-        <div class="metric-chip">
-            <span class="metric-chip-icon">⏱️</span>
-            <span class="metric-chip-label">Total Time:</span>
-            <span class="metric-chip-val">{total_time:.1f}s</span>
-        </div>
-        <div class="metric-chip">
-            <span class="metric-chip-icon">⚡</span>
-            <span class="metric-chip-label">Denoise ({result.steps_executed} st):</span>
-            <span class="metric-chip-val">{result.time_denoise_s:.1f}s</span>
-        </div>
-        <div class="metric-chip">
-            <span class="metric-chip-icon">📐</span>
-            <span class="metric-chip-label">Resolution:</span>
-            <span class="metric-chip-val">{res_w}×{res_h}</span>
-        </div>
-        <div class="metric-chip">
-            <span class="metric-chip-icon">💾</span>
-            <span class="metric-chip-label">Peak VRAM:</span>
-            <span class="metric-chip-val">{result.peak_memory_mib:.0f} MB</span>
-        </div>
-        <div class="metric-chip">
-            <span class="metric-chip-icon">🎛️</span>
-            <span class="metric-chip-label">Mode:</span>
-            <span class="metric-chip-val">{mode.capitalize()}</span>
-        </div>
+    <div class="telemetry-bar">
+        <span class="telemetry-item"><span class="telemetry-k">Latency:</span> <span class="telemetry-v">{total_time:.2f}s</span></span>
+        <span class="telemetry-sep">·</span>
+        <span class="telemetry-item"><span class="telemetry-k">Denoise ({result.steps_executed} steps):</span> <span class="telemetry-v">{result.time_denoise_s:.2f}s</span></span>
+        <span class="telemetry-sep">·</span>
+        <span class="telemetry-item"><span class="telemetry-k">Resolution:</span> <span class="telemetry-v">{res_w}×{res_h}</span></span>
+        <span class="telemetry-sep">·</span>
+        <span class="telemetry-item"><span class="telemetry-k">Peak VRAM:</span> <span class="telemetry-v">{result.peak_memory_mib:.0f} MB</span></span>
+        <span class="telemetry-sep">·</span>
+        <span class="telemetry-item"><span class="telemetry-k">Mode:</span> <span class="telemetry-v">{mode}</span></span>
     </div>
-    <div class="stage-timing-table">
-        <span class="timing-col">Encode: <b>{result.time_encode_s:.2f}s</b></span> •
-        <span class="timing-col">Denoise: <b>{result.time_denoise_s:.2f}s</b></span> •
-        <span class="timing-col">VAE Decode: <b>{result.time_decode_s:.2f}s</b></span> •
-        <span class="timing-col">CV Enhancement: <b>{result.time_postprocess_s:.2f}s</b></span>
+    <div class="stage-timing-row">
+        <span>Encode {result.time_encode_s:.2f}s</span>
+        <span>Denoise {result.time_denoise_s:.2f}s</span>
+        <span>VAE decode {result.time_decode_s:.2f}s</span>
+        <span>CV enhance {result.time_postprocess_s:.2f}s</span>
     </div>
     """
 
@@ -362,308 +341,313 @@ def generate_image_ui(
         metrics_html,
         qr_text,
         fb_text,
-        f"✅ Finished in {total_time:.1f}s ({result.steps_executed} steps, {res_w}×{res_h})",
+        f"Completed in {total_time:.2f}s ({result.steps_executed} steps, {res_w}×{res_h})",
     )
 
 
 # ---------------------------------------------------------------------------
-# Custom CSS Styling (Dark Obsidian, Flame Orange, Glassmorphic Polish)
+# Strict Anti-Slop Design System (Linear / Raycast / GitHub Dark Palette)
 # ---------------------------------------------------------------------------
 
 CUSTOM_CSS = """
+/* Reset & Base Fonts */
 :root {
-    --bg-dark: #0A0D14;
-    --surface-card: #121826;
-    --surface-card-hover: #182235;
-    --surface-glass: rgba(18, 24, 38, 0.85);
-    --border-subtle: rgba(255, 255, 255, 0.08);
-    --border-accent: rgba(255, 107, 0, 0.35);
-    --accent-orange: #FF6B00;
-    --accent-orange-hover: #FF851A;
-    --accent-orange-glow: rgba(255, 107, 0, 0.25);
-    --text-primary: #F8FAFC;
-    --text-secondary: #94A3B8;
-    --text-muted: #64748B;
+    --bg-ground: #0d1117;
+    --bg-surface: #161b22;
+    --bg-surface-elevated: #21262d;
+    --border-color: #30363d;
+    --border-subtle: #21262d;
+    --text-ink: #f0f6fc;
+    --text-muted: #8b949e;
+    --text-faint: #484f58;
+    --accent-orange: #ea580c;
+    --accent-hover: #f97316;
 }
 
 body, .gradio-container {
-    background-color: var(--bg-dark) !important;
-    color: var(--text-primary) !important;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Inter", sans-serif !important;
+    background-color: var(--bg-ground) !important;
+    color: var(--text-ink) !important;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif !important;
+    -webkit-font-smoothing: antialiased;
 }
 
-/* Header brand card */
-.brand-header-card {
-    background: linear-gradient(180deg, #141C2E 0%, #0F1523 100%);
-    border: 1px solid var(--border-subtle);
-    border-radius: 16px;
-    padding: 1.25rem 1.75rem;
-    margin-bottom: 1.25rem;
+/* App Header */
+.app-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
+    padding: 14px 20px;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    margin-bottom: 16px;
 }
 
-.brand-title-wrap {
+.app-brand {
     display: flex;
-    align-items: center;
-    gap: 14px;
+    align-items: baseline;
+    gap: 12px;
 }
 
-.brand-icon {
-    font-size: 2rem;
-    filter: drop-shadow(0 0 12px rgba(255, 107, 0, 0.6));
-}
-
-.brand-title {
-    font-size: 1.75rem;
-    font-weight: 800;
-    letter-spacing: -0.02em;
-    background: linear-gradient(135deg, #FFFFFF 30%, #FF851A 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
+.app-name {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--text-ink);
+    letter-spacing: -0.01em;
     margin: 0;
 }
 
-.brand-subtitle {
-    font-size: 0.85rem;
-    color: var(--text-secondary);
-    margin: 3px 0 0 0;
+.app-desc {
+    font-size: 13px;
+    color: var(--text-muted);
+    margin: 0;
 }
 
-.hw-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    background: rgba(255, 107, 0, 0.1);
-    border: 1px solid rgba(255, 107, 0, 0.3);
-    border-radius: 9999px;
-    padding: 6px 14px;
-    font-size: 0.8rem;
-    font-weight: 600;
-    color: #FFA34D;
+.hw-tag {
+    font-size: 12px;
+    font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+    color: var(--text-muted);
+    background: var(--bg-ground);
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    padding: 4px 10px;
 }
 
-.live-pulse {
-    width: 8px;
-    height: 8px;
-    background-color: #22C55E;
-    border-radius: 50%;
-    box-shadow: 0 0 8px #22C55E;
-    animation: pulseGlow 2s infinite;
-}
-
-@keyframes pulseGlow {
-    0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7); }
-    70% { transform: scale(1.05); box-shadow: 0 0 0 6px rgba(34, 197, 94, 0); }
-    100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); }
-}
-
-/* Primary generate button */
-.primary-cta-btn {
-    background: linear-gradient(135deg, #FF6B00 0%, #FF8800 100%) !important;
-    color: #FFFFFF !important;
-    font-weight: 700 !important;
-    font-size: 1.15rem !important;
-    border: none !important;
-    border-radius: 14px !important;
-    padding: 16px 28px !important;
-    box-shadow: 0 4px 22px rgba(255, 107, 0, 0.38) !important;
-    transition: transform 120ms ease, box-shadow 150ms ease !important;
+/* Primary Button - Flat, crisp, confident */
+.primary-action-btn {
+    background: var(--accent-orange) !important;
+    color: #ffffff !important;
+    font-weight: 500 !important;
+    font-size: 14px !important;
+    border: 1px solid #c2410c !important;
+    border-radius: 6px !important;
+    padding: 10px 18px !important;
+    box-shadow: none !important;
     cursor: pointer !important;
-    width: 100% !important;
-    margin-top: 10px !important;
+    transition: background-color 100ms ease, transform 60ms ease !important;
 }
 
-.primary-cta-btn:hover {
-    background: linear-gradient(135deg, #FF7B1A 0%, #FF991A 100%) !important;
-    box-shadow: 0 6px 28px rgba(255, 107, 0, 0.55) !important;
-    transform: translateY(-1px) !important;
+.primary-action-btn:hover {
+    background: var(--accent-hover) !important;
+    box-shadow: none !important;
 }
 
-.primary-cta-btn:active {
+.primary-action-btn:active {
     transform: scale(0.98) !important;
 }
 
-/* Status live chip */
-.live-status-box {
-    background: #0D131F !important;
-    border: 1px solid rgba(255, 107, 0, 0.28) !important;
-    border-radius: 12px !important;
-    color: #FFA34D !important;
-    font-weight: 600 !important;
-    font-size: 0.95rem !important;
+/* Status Monitor Bar */
+.status-monitor {
+    background: var(--bg-ground) !important;
+    border: 1px solid var(--border-color) !important;
+    border-radius: 6px !important;
+    color: var(--text-muted) !important;
+    font-size: 13px !important;
+    font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace !important;
+    padding: 8px 12px !important;
 }
 
-/* Metrics bar below output */
-.metrics-bar-container {
+/* Telemetry & Stage Timings */
+.telemetry-bar {
     display: flex;
     flex-wrap: wrap;
-    gap: 8px;
-    margin-top: 10px;
-    margin-bottom: 6px;
-}
-
-.metric-chip {
-    background: rgba(255, 255, 255, 0.04);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 8px;
-    padding: 6px 12px;
-    font-size: 0.8rem;
-    display: flex;
     align-items: center;
-    gap: 5px;
+    gap: 8px;
+    padding: 8px 12px;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    font-size: 12px;
+    font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+    margin-top: 8px;
 }
 
-.metric-chip-icon {
-    font-size: 0.9rem;
+.telemetry-item {
+    display: inline-flex;
+    gap: 4px;
 }
 
-.metric-chip-label {
-    color: var(--text-secondary);
-}
-
-.metric-chip-val {
-    color: #FF851A;
-    font-weight: 700;
-}
-
-.stage-timing-table {
-    font-size: 0.8rem;
+.telemetry-k {
     color: var(--text-muted);
-    padding: 4px 2px;
 }
 
-.stage-timing-table b {
-    color: var(--text-secondary);
+.telemetry-v {
+    color: var(--text-ink);
+    font-weight: 500;
 }
 
-/* Tab container styling */
+.telemetry-sep {
+    color: var(--border-color);
+}
+
+.stage-timing-row {
+    display: flex;
+    gap: 14px;
+    font-size: 11px;
+    color: var(--text-faint);
+    font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+    padding: 4px 6px;
+}
+
+/* Tabs */
 .tab-nav {
-    border-bottom: 1px solid var(--border-subtle) !important;
-    margin-bottom: 1.25rem !important;
+    border-bottom: 1px solid var(--border-color) !important;
+    margin-bottom: 16px !important;
 }
 
 .tab-nav button {
-    font-weight: 600 !important;
-    font-size: 0.95rem !important;
-    padding: 10px 20px !important;
-    color: var(--text-secondary) !important;
+    font-size: 13px !important;
+    font-weight: 500 !important;
+    padding: 8px 16px !important;
+    color: var(--text-muted) !important;
+    border: none !important;
+    background: transparent !important;
 }
 
 .tab-nav button.selected {
-    color: var(--accent-orange) !important;
+    color: var(--text-ink) !important;
     border-bottom: 2px solid var(--accent-orange) !important;
+    background: transparent !important;
 }
 
-/* Dashboard KPI Card Grid */
-.kpi-grid {
+/* Dashboard Unified Stat Strip */
+.stat-strip {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-    gap: 16px;
-    margin-bottom: 24px;
-}
-
-.kpi-card {
-    background: var(--surface-card);
-    border: 1px solid var(--border-subtle);
-    border-radius: 14px;
-    padding: 18px 20px;
-    position: relative;
+    grid-template-columns: repeat(4, 1fr);
+    background: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    margin-bottom: 20px;
     overflow: hidden;
 }
 
-.kpi-card::before {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 4px;
-    height: 100%;
-    background: var(--accent-orange);
+.stat-cell {
+    padding: 16px 20px;
+    border-right: 1px solid var(--border-color);
 }
 
-.kpi-title {
-    font-size: 0.8rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    color: var(--text-secondary);
-    margin-bottom: 6px;
+.stat-cell:last-child {
+    border-right: none;
 }
 
-.kpi-value {
-    font-size: 1.8rem;
-    font-weight: 800;
-    color: #FFFFFF;
-    line-height: 1.1;
-}
-
-.kpi-badge {
-    display: inline-block;
-    margin-top: 8px;
-    font-size: 0.75rem;
-    font-weight: 700;
-    padding: 2px 8px;
-    border-radius: 6px;
-    background: rgba(34, 197, 94, 0.15);
-    color: #4ADE80;
-}
-
-.kpi-desc {
-    font-size: 0.75rem;
+.stat-label {
+    font-size: 12px;
     color: var(--text-muted);
-    margin-top: 4px;
-}
-
-/* Comparison bar table */
-.dash-section-card {
-    background: var(--surface-card);
-    border: 1px solid var(--border-subtle);
-    border-radius: 14px;
-    padding: 20px 24px;
-    margin-bottom: 20px;
-}
-
-.dash-section-title {
-    font-size: 1.15rem;
-    font-weight: 700;
-    color: #FFFFFF;
-    margin-bottom: 12px;
-}
-
-.dash-bar-row {
-    margin-bottom: 14px;
-}
-
-.dash-bar-meta {
-    display: flex;
-    justify-content: space-between;
-    font-size: 0.85rem;
     margin-bottom: 4px;
 }
 
-.dash-bar-bg {
+.stat-value {
+    font-size: 24px;
+    font-weight: 600;
+    color: var(--text-ink);
+    font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+    letter-spacing: -0.02em;
+}
+
+.stat-context {
+    font-size: 12px;
+    color: var(--text-faint);
+    margin-top: 4px;
+}
+
+/* Comparison Container */
+.benchmark-container {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 18px 20px;
+    margin-bottom: 18px;
+}
+
+.benchmark-heading {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-ink);
+    margin-bottom: 14px;
+}
+
+.benchmark-row {
+    margin-bottom: 12px;
+}
+
+.benchmark-labels {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    margin-bottom: 4px;
+}
+
+.benchmark-track {
     width: 100%;
-    height: 10px;
-    background: rgba(255, 255, 255, 0.06);
-    border-radius: 9999px;
+    height: 8px;
+    background: var(--bg-ground);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
     overflow: hidden;
 }
 
-.dash-bar-fill {
+.benchmark-fill-orange {
     height: 100%;
-    border-radius: 9999px;
-    transition: width 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+    background: var(--accent-orange);
+    border-radius: 3px;
 }
 
-/* Footer styling */
-.app-footer {
-    text-align: center;
-    padding: 2rem 0 1rem 0;
+.benchmark-fill-green {
+    height: 100%;
+    background: #16a34a;
+    border-radius: 3px;
+}
+
+.benchmark-fill-neutral {
+    height: 100%;
+    background: #484f58;
+    border-radius: 3px;
+}
+
+.benchmark-fill-red {
+    height: 100%;
+    background: #dc2626;
+    border-radius: 3px;
+}
+
+/* Clean Ruled Table */
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    margin-top: 8px;
+}
+
+.data-table th {
+    text-align: left;
+    padding: 8px 12px;
+    font-size: 12px;
+    font-weight: 500;
     color: var(--text-muted);
-    font-size: 0.85rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.data-table td {
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--border-subtle);
+    color: var(--text-ink);
+}
+
+.data-table td.num {
+    text-align: right;
+    font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+}
+
+.data-table th.num {
+    text-align: right;
+}
+
+/* Footer */
+.clean-footer {
+    text-align: center;
+    padding: 24px 0 12px 0;
+    color: var(--text-faint);
+    font-size: 12px;
 }
 """
 
@@ -674,71 +658,61 @@ body, .gradio-container {
 
 
 def build_app() -> gr.Blocks:
-    """Build production-grade ImageForgeAI application interface."""
+    """Build ImageForge production interface."""
     device_label = (
         "NVIDIA GeForce GTX 1050 (4 GB CUDA)"
         if torch.cuda.is_available()
-        else "CPU (4-Thread Mobile Proxy)"
+        else "CPU (4-Thread Proxy)"
     )
 
-    with gr.Blocks(title="ImageForgeAI — Edge AI Image Studio", css=CUSTOM_CSS) as demo:
-        # Brand Header Card
+    with gr.Blocks(title="ImageForge — Text-to-Image Pipeline", css=CUSTOM_CSS) as demo:
+        # App Header
         gr.HTML(
             f"""
-            <div class="brand-header-card">
-                <div class="brand-title-wrap">
-                    <span class="brand-icon">⚡</span>
-                    <div>
-                        <h1 class="brand-title">ImageForgeAI</h1>
-                        <p class="brand-subtitle">Resource-Efficient Text-to-Image Generation & Computer Vision Studio</p>
-                    </div>
+            <header class="app-header">
+                <div class="app-brand">
+                    <span class="app-name">ImageForge</span>
+                    <span class="app-desc">Resource-efficient text-to-image synthesis pipeline</span>
                 </div>
-                <div class="hw-badge">
-                    <span class="live-pulse"></span>
-                    <span>{device_label}</span>
-                </div>
-            </div>
+                <div class="hw-tag">{device_label}</div>
+            </header>
             """
         )
 
-        with gr.Tabs() as tabs:
+        with gr.Tabs():
             # -------------------------------------------------------------
-            # TAB 1: 🎨 STUDIO (Image Generator)
+            # TAB 1: Generator
             # -------------------------------------------------------------
-            with gr.Tab("🎨 Studio (Generator)"):
+            with gr.Tab("Generator"):
                 with gr.Row():
-                    # Left Column: Input and Configuration Controls
+                    # Left Column: Inputs
                     with gr.Column(scale=1):
                         prompt = gr.Textbox(
                             label="Prompt",
-                            placeholder="Describe what you want to imagine... (e.g., A vibrant red apple resting on a rustic dark wooden table, studio lighting, sharp focus)",
+                            placeholder="Describe image contents (e.g., A red apple on a dark wooden table, studio lighting, sharp focus)",
                             value="a vibrant red apple resting on a rustic dark wooden table, studio lighting, highly detailed",
                             lines=3,
                         )
 
-                        # Generation Mode with visual guidance
                         mode = gr.Radio(
-                            label="Generation Mode",
+                            label="Generation mode",
                             choices=["adaptive", "optimized", "baseline"],
                             value="adaptive",
-                            info="⚡ Adaptive: Auto-budgets latency & memory | 🚀 Optimized: DPM-Solver++ & Guided Filter | 🏛️ Baseline: Unoptimized reference",
+                            info="Adaptive: Dynamic resource budgeting · Optimized: DPM-Solver++ 20 steps with guided filtering · Baseline: Unoptimized reference",
                         )
 
-                        # Resolution Selector (Supported Only)
                         resolution = gr.Dropdown(
-                            label="Output Resolution",
+                            label="Resolution",
                             choices=["512x512", "384x384", "256x256"],
                             value="512x512",
-                            info="512×512: Studio Photorealism (Recommended) | 384×384: Fast Preview | 256×256: Mobile Draft",
+                            info="512×512 native · 384×384 fast · 256×256 draft",
                         )
 
-                        # Primary Action Button
-                        generate_btn = gr.Button("✨ Generate Image", elem_classes=["primary-cta-btn"])
+                        generate_btn = gr.Button("Generate image", elem_classes=["primary-action-btn"])
 
-                        # Collapsible Advanced Settings (Hidden by default)
-                        with gr.Accordion("⚙️ Advanced Studio Controls", open=False):
+                        with gr.Accordion("Advanced controls", open=False):
                             negative_prompt = gr.Textbox(
-                                label="Negative Prompt (Quality Safeguards)",
+                                label="Negative prompt",
                                 value="lowres, bad anatomy, bad quality, blurry, oversaturated, deformed, grainy, disfigured",
                                 lines=2,
                             )
@@ -749,7 +723,7 @@ def build_app() -> gr.Blocks:
                                     precision=0,
                                 )
                                 guidance_scale = gr.Slider(
-                                    label="Guidance Scale (CFG)",
+                                    label="Guidance scale (CFG)",
                                     minimum=1.0,
                                     maximum=15.0,
                                     value=7.5,
@@ -757,218 +731,239 @@ def build_app() -> gr.Blocks:
                                 )
                             with gr.Row():
                                 steps = gr.Slider(
-                                    label="Inference Steps",
+                                    label="Inference steps",
                                     minimum=5,
                                     maximum=30,
                                     value=20,
                                     step=1,
-                                    info="15–20 optimal for DPM-Solver++",
                                 )
                                 model_variant = gr.Dropdown(
-                                    label="Model Architecture",
+                                    label="Model variant",
                                     choices=["dreamshaper_v8", "full_unet", "block_pruned"],
                                     value="dreamshaper_v8",
-                                    info="DreamShaper v8: Default photorealism | BK-SDM: 44% pruned mobile",
+                                    info="dreamshaper_v8 (fine-tuned) · full_unet (stock) · block_pruned (44% smaller)",
                                 )
 
                             classical_pp = gr.Checkbox(
-                                label="Enable Classical CV Post-Processing (LAB CLAHE & Guided Filter)",
+                                label="Enable classical CV post-processing (LAB-space CLAHE and guided edge filtering)",
                                 value=True,
                             )
 
                             with gr.Group():
-                                gr.Markdown("<p style='font-size:0.8rem; color:#94A3B8; margin-bottom:4px;'><b>Adaptive Controller Parameters (Used when Mode = Adaptive):</b></p>")
+                                gr.Markdown("<p style='font-size:12px; color:#8b949e; margin-bottom:4px;'>Adaptive controller bounds:</p>")
                                 with gr.Row():
                                     latency_budget = gr.Slider(
-                                        label="Latency Budget (s)",
+                                        label="Latency budget (s)",
                                         minimum=10.0,
                                         maximum=300.0,
                                         value=120.0,
                                         step=5.0,
                                     )
                                     memory_budget = gr.Slider(
-                                        label="Memory Budget (MB)",
+                                        label="Memory budget (MB)",
                                         minimum=500,
                                         maximum=4000,
                                         value=900,
                                         step=64,
                                     )
                                     quality_pref = gr.Dropdown(
-                                        label="Quality Preference",
+                                        label="Quality preference",
                                         choices=["fast", "balanced", "quality"],
                                         value="balanced",
                                     )
 
-                    # Right Column: Canvas Output & Live Telemetry
+                    # Right Column: Canvas
                     with gr.Column(scale=1):
                         status_box = gr.Textbox(
-                            label="⚡ Generation Status",
-                            value="Ready — enter a prompt and click Generate Image",
+                            label="Status",
+                            value="Ready",
                             lines=1,
                             interactive=False,
-                            elem_classes=["live-status-box"],
+                            elem_classes=["status-monitor"],
                         )
 
                         image_output = gr.Image(
-                            label="Generated Image",
+                            label="Output",
                             type="pil",
                             interactive=False,
                         )
 
                         metrics_output = gr.HTML(
-                            label="Execution Telemetry",
-                            value="<p style='color:#64748B; font-size:0.85rem;'>Generation telemetry will appear here after completion.</p>",
+                            label="Metrics",
+                            value="<p style='color:#484f58; font-size:12px; margin:4px 0;'>Inference telemetry will display after execution.</p>",
                         )
 
-                        # Before vs After Classical Post-Processing Container
-                        with gr.Accordion("🖼️ Classical CV Enhancement Comparison (Raw vs Enhanced)", open=False):
-                            gr.Markdown(
-                                "<p style='font-size:0.85rem; color:#94A3B8;'>"
-                                "Comparison of the raw neural VAE output vs the classical LAB-CLAHE & Guided Edge-enhanced result (+141.7% Laplacian edge boost)."
-                                "</p>"
-                            )
+                        with gr.Accordion("Compare with raw neural output (pre-filtering)", open=False):
                             image_before_output = gr.Image(
-                                label="Raw Neural Output (Before Classical CV)",
+                                label="Raw VAE output (before classical CV)",
                                 type="pil",
                                 interactive=False,
                             )
 
             # -------------------------------------------------------------
-            # TAB 2: 📊 PERFORMANCE DASHBOARD
+            # TAB 2: Performance Benchmarks
             # -------------------------------------------------------------
-            with gr.Tab("📊 Performance Dashboard"):
+            with gr.Tab("Benchmarks"):
                 gr.HTML(
                     """
-                    <div class="kpi-grid">
-                        <div class="kpi-card">
-                            <div class="kpi-title">Inference Speedup</div>
-                            <div class="kpi-value">3.3×</div>
-                            <div class="kpi-badge">Faster vs DDIM Baseline</div>
-                            <div class="kpi-desc">DPM-Solver++ converges in 15–20 steps vs 50+ ancestral steps.</div>
+                    <div class="stat-strip">
+                        <div class="stat-cell">
+                            <div class="stat-label">Inference rate</div>
+                            <div class="stat-value">0.38s</div>
+                            <div class="stat-context">per step on GTX 1050 (3.3× faster than DDIM)</div>
                         </div>
-                        <div class="kpi-card">
-                            <div class="kpi-title">Peak GPU VRAM</div>
-                            <div class="kpi-value">1,365 MB</div>
-                            <div class="kpi-badge">62% Memory Cut</div>
-                            <div class="kpi-desc">&lt;35% of 4 GB GTX 1050 capacity; 0 MB CPU paging thrash.</div>
+                        <div class="stat-cell">
+                            <div class="stat-label">Peak GPU VRAM</div>
+                            <div class="stat-value">1,365 MB</div>
+                            <div class="stat-context">33.3% of 4 GB capacity (62% reduction)</div>
                         </div>
-                        <div class="kpi-card">
-                            <div class="kpi-title">Edge Sharpness Boost</div>
-                            <div class="kpi-value">+141.7%</div>
-                            <div class="kpi-badge">Laplacian Variance: 344.8</div>
-                            <div class="kpi-desc">Guided filtering enhances high-frequency micro-textures in &lt;35ms.</div>
+                        <div class="stat-cell">
+                            <div class="stat-label">Laplacian variance</div>
+                            <div class="stat-value">344.8</div>
+                            <div class="stat-context">+141.7% increase via guided filtering</div>
                         </div>
-                        <div class="kpi-card">
-                            <div class="kpi-title">Prompt Semantic Alignment</div>
-                            <div class="kpi-value">20.95</div>
-                            <div class="kpi-badge">98% Retention</div>
-                            <div class="kpi-desc">CLIPScore preserved vs uncompressed FP32 baseline (21.41).</div>
+                        <div class="stat-cell">
+                            <div class="stat-label">CLIPScore</div>
+                            <div class="stat-value">20.95</div>
+                            <div class="stat-context">98% alignment retention vs uncompressed baseline</div>
                         </div>
                     </div>
 
-                    <div class="dash-section-card">
-                        <div class="dash-section-title">⏱️ Reverse Diffusion Convergence & Step Latency Comparison</div>
+                    <div class="benchmark-container">
+                        <div class="benchmark-heading">Step convergence and total execution time</div>
                         
-                        <div class="dash-bar-row">
-                            <div class="dash-bar-meta">
-                                <span><b>DPM-Solver++ Multistep (ImageForgeAI Default)</b> — 15 steps @ 512×512</span>
-                                <span style="color:#FF851A; font-weight:700;">15.8s Total (0.38s / step)</span>
+                        <div class="benchmark-row">
+                            <div class="benchmark-labels">
+                                <span><b>DPM-Solver++ (ImageForge default)</b> · 15 steps @ 512×512</span>
+                                <span><b>15.8s</b> (0.38s / step)</span>
                             </div>
-                            <div class="dash-bar-bg">
-                                <div class="dash-bar-fill" style="width: 30%; background: linear-gradient(90deg, #FF6B00, #FF991A);"></div>
-                            </div>
-                        </div>
-
-                        <div class="dash-bar-row">
-                            <div class="dash-bar-meta">
-                                <span><b>LCM-LoRA Distilled Profile (Mobile Ultra-Low Latency)</b> — 4 steps @ 256×256</span>
-                                <span style="color:#22C55E; font-weight:700;">4.8s Total (0.35s / step)</span>
-                            </div>
-                            <div class="dash-bar-bg">
-                                <div class="dash-bar-fill" style="width: 10%; background: #22C55E;"></div>
+                            <div class="benchmark-track">
+                                <div class="benchmark-fill-orange" style="width: 30%;"></div>
                             </div>
                         </div>
 
-                        <div class="dash-bar-row">
-                            <div class="dash-bar-meta">
-                                <span><b>DDIM Ancestral Baseline (Stock Diffusers)</b> — 50 steps @ 512×512</span>
-                                <span style="color:#94A3B8; font-weight:700;">52.3s Total (0.42s / step)</span>
+                        <div class="benchmark-row">
+                            <div class="benchmark-labels">
+                                <span><b>LCM-LoRA distilled profile</b> · 4 steps @ 256×256</span>
+                                <span><b>4.8s</b> (0.35s / step)</span>
                             </div>
-                            <div class="dash-bar-bg">
-                                <div class="dash-bar-fill" style="width: 100%; background: #475569;"></div>
+                            <div class="benchmark-track">
+                                <div class="benchmark-fill-green" style="width: 9.2%;"></div>
+                            </div>
+                        </div>
+
+                        <div class="benchmark-row">
+                            <div class="benchmark-labels">
+                                <span><b>DDIM ancestral baseline</b> · 50 steps @ 512×512</span>
+                                <span><b>52.3s</b> (0.42s / step)</span>
+                            </div>
+                            <div class="benchmark-track">
+                                <div class="benchmark-fill-neutral" style="width: 100%;"></div>
                             </div>
                         </div>
                     </div>
 
-                    <div class="dash-section-card">
-                        <div class="dash-section-title">💾 Peak Memory Allocation Under 4 GB Hardware Constraints</div>
+                    <div class="benchmark-container">
+                        <div class="benchmark-heading">Peak memory allocation under 4 GB hardware ceiling</div>
                         
-                        <div class="dash-bar-row">
-                            <div class="dash-bar-meta">
-                                <span><b>ImageForgeAI (Streaming Meta-Loader + Sequential CFG)</b></span>
-                                <span style="color:#FF851A; font-weight:700;">1,365 MB VRAM / 380 MB RAM (<35% Ceiling)</span>
+                        <div class="benchmark-row">
+                            <div class="benchmark-labels">
+                                <span><b>ImageForge (Streaming meta-loader + sequential CFG)</b></span>
+                                <span><b>1,365 MB VRAM</b> / 380 MB RAM</span>
                             </div>
-                            <div class="dash-bar-bg">
-                                <div class="dash-bar-fill" style="width: 38%; background: linear-gradient(90deg, #FF6B00, #FF991A);"></div>
-                            </div>
-                        </div>
-
-                        <div class="dash-bar-row">
-                            <div class="dash-bar-meta">
-                                <span><b>Stock SD 1.5 Pipeline (Unoptimized CUDA Loading)</b></span>
-                                <span style="color:#EF4444; font-weight:700;">3,580 MB VRAM / 890 MB RAM (Near OOM Failure)</span>
-                            </div>
-                            <div class="dash-bar-bg">
-                                <div class="dash-bar-fill" style="width: 90%; background: #EF4444;"></div>
+                            <div class="benchmark-track">
+                                <div class="benchmark-fill-orange" style="width: 38.1%;"></div>
                             </div>
                         </div>
 
-                        <div class="dash-bar-row">
-                            <div class="dash-bar-meta">
-                                <span><b>CPU Software FP16 Baseline</b></span>
-                                <span style="color:#94A3B8; font-weight:700;">>2,100 MB RAM (Paging Thrash >600s)</span>
+                        <div class="benchmark-row">
+                            <div class="benchmark-labels">
+                                <span><b>Stock SD 1.5 pipeline (Unoptimized PyTorch CUDA loader)</b></span>
+                                <span><b>3,580 MB VRAM</b> / 890 MB RAM</span>
                             </div>
-                            <div class="dash-bar-bg">
-                                <div class="dash-bar-fill" style="width: 100%; background: #475569;"></div>
+                            <div class="benchmark-track">
+                                <div class="benchmark-fill-red" style="width: 100%;"></div>
                             </div>
                         </div>
+                    </div>
+
+                    <div class="benchmark-container">
+                        <div class="benchmark-heading">Measured benchmark matrix</div>
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Approach / Variant</th>
+                                    <th class="num">CLIPScore ↑</th>
+                                    <th class="num">Laplacian Var ↑</th>
+                                    <th class="num">Peak VRAM</th>
+                                    <th class="num">Host RAM</th>
+                                    <th class="num">Rate</th>
+                                    <th class="num">Total Time</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Classical filters only</td>
+                                    <td class="num">—</td>
+                                    <td class="num">248.5</td>
+                                    <td class="num">0 MB</td>
+                                    <td class="num">145 MB</td>
+                                    <td class="num">—</td>
+                                    <td class="num">0.034s</td>
+                                </tr>
+                                <tr>
+                                    <td>Stock SD 1.5 (CPU FP16)</td>
+                                    <td class="num">17.42</td>
+                                    <td class="num">118.2</td>
+                                    <td class="num">0 MB</td>
+                                    <td class="num">&gt;2,100 MB</td>
+                                    <td class="num">&gt;12.0s / step</td>
+                                    <td class="num">&gt;600.0s</td>
+                                </tr>
+                                <tr>
+                                    <td>Full SD 1.5 U-Net (CUDA)</td>
+                                    <td class="num">21.41</td>
+                                    <td class="num">142.6</td>
+                                    <td class="num">3,580 MB</td>
+                                    <td class="num">890 MB</td>
+                                    <td class="num">0.42s / step</td>
+                                    <td class="num">52.3s</td>
+                                </tr>
+                                <tr>
+                                    <td><b>ImageForge (DreamShaper v8 + CV)</b></td>
+                                    <td class="num"><b>20.95</b></td>
+                                    <td class="num"><b>344.8</b></td>
+                                    <td class="num"><b>1,365 MB</b></td>
+                                    <td class="num"><b>380 MB</b></td>
+                                    <td class="num"><b>0.38s / step</b></td>
+                                    <td class="num"><b>65.4s (20 st)</b></td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
                     """
                 )
 
-                # Real Benchmark Table
-                bench_md = (
-                    "### 📋 Comprehensive Quantitative Benchmark Matrix\n\n"
-                    "| Strategy / Model Variant | CLIPScore ↑ | Laplacian Var ↑ | Peak VRAM | Host RAM | Denoise Rate | Total Time |\n"
-                    "| :--- | :---: | :---: | :---: | :---: | :---: | :---: |\n"
-                    "| **Classical Baseline (Post-Processing Only)** | N/A | 248.5 | 0 MB | 145 MB | N/A | **0.034s** |\n"
-                    "| **Stock SD 1.5 (CPU Software FP16)** | 17.42 | 118.2 | 0 MB | >2,100 MB* | >12.0s / step | >600.0s |\n"
-                    "| **Full SD 1.5 U-Net (CUDA Default)** | 21.41 | 142.6 | 3,580 MB | 890 MB | 0.42s / step | 52.3s |\n"
-                    "| **ImageForgeAI (DreamShaper v8 + CV Post-Process)** | **20.95** | **344.8** | **1,365 MB** | **380 MB** | **0.38s / step** | **65.4s (20 st)** |\n\n"
-                    "*Note: Measured locally on Intel 6-Core CPU, 8 GB RAM, NVIDIA GeForce GTX 1050 (4 GB VRAM) running Windows 11.*"
-                )
-                gr.Markdown(bench_md)
-
             # -------------------------------------------------------------
-            # TAB 3: 🔬 DIAGNOSTICS & TELEMETRY
+            # TAB 3: Diagnostics
             # -------------------------------------------------------------
-            with gr.Tab("🔬 Diagnostics"):
-                gr.Markdown("### 🔬 System Telemetry, Non-Reference Quality Audit & Fallback Logs")
+            with gr.Tab("Diagnostics"):
+                gr.Markdown("### Diagnostics and non-reference quality metrics")
                 with gr.Row():
                     with gr.Column():
                         qr_output = gr.Code(
-                            label="Quality Report (No-Reference Computer Vision Metrics)",
+                            label="Quality report (BRISQUE, NIQE, Laplacian, saturation)",
                             language="json",
                             value="{}",
                         )
                     with gr.Column():
                         fb_output = gr.Textbox(
-                            label="Adaptive Controller & Fallback Execution Log",
-                            value="No fallback triggered yet.",
+                            label="Adaptive controller log",
+                            value="No fallback triggered.",
                             lines=6,
                         )
 
-        # Wire Primary Generation Action
+        # Event Binding
         generate_btn.click(
             fn=generate_image_ui,
             inputs=[
@@ -995,12 +990,11 @@ def build_app() -> gr.Blocks:
             ],
         )
 
-        # Clean App Footer
         gr.HTML(
             """
-            <div class="app-footer">
-                <b>ImageForgeAI</b> • Resource-Efficient Text-to-Image Generation &bull; © 2026 Team Nexus • PES University
-            </div>
+            <footer class="clean-footer">
+                ImageForge · Team Nexus · PES University
+            </footer>
             """
         )
 
@@ -1013,8 +1007,8 @@ def build_app() -> gr.Blocks:
 
 
 def main():
-    """Launch ImageForgeAI local web application."""
-    p = argparse.ArgumentParser(description="Launch ImageForgeAI web application.")
+    """Launch ImageForge local web application."""
+    p = argparse.ArgumentParser(description="Launch ImageForge web application.")
     p.add_argument("--port", type=int, default=7860)
     p.add_argument("--share", action="store_true")
     args = p.parse_args()

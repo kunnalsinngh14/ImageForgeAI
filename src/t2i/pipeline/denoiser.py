@@ -344,10 +344,9 @@ def load_denoiser(
             unet = UNet2DConditionModel(**cfg_dict)
         import safetensors.torch
 
-        sd = safetensors.torch.load_file(str(w_file), device="cpu")
+        sd = safetensors.torch.load_file(str(w_file), device=str(device))
         unet.load_state_dict(sd, assign=True)
         del sd
-        unet = unet.to(device)
     else:
         use_variant = (
             "fp16" if (target_dir / "diffusion_pytorch_model.fp16.safetensors").exists() else None

@@ -362,8 +362,8 @@ def generate_image_ui(
 
 def build_app() -> gr.Blocks:
     """Build Gradio UI interface."""
-    with gr.Blocks(title="P3: Mobile Text-to-Image Generation") as demo:
-        gr.Markdown("# 🚀 Resource-Efficient Text-to-Image Generation (P3)")
+    with gr.Blocks(title="ImageForgeAI — Resource-Efficient Text-to-Image Generation") as demo:
+        gr.Markdown("# 🚀 ImageForgeAI: Resource-Efficient Text-to-Image Generation")
         device_label = (
             "NVIDIA GeForce GTX 1050 (4 GB CUDA)"
             if torch.cuda.is_available()
@@ -489,6 +489,12 @@ def build_app() -> gr.Blocks:
             ],
         )
 
+        gr.Markdown(
+            "<div style='text-align: center; margin-top: 2rem; color: #888; font-size: 0.9em;'>"
+            "ImageForgeAI &bull; © 2026 Team Nexus"
+            "</div>"
+        )
+
     return demo
 
 
@@ -498,8 +504,8 @@ def build_app() -> gr.Blocks:
 
 
 def main():
-    """Launch the local T2I web application."""
-    p = argparse.ArgumentParser(description="Launch the local T2I web application.")
+    """Launch ImageForgeAI local web application."""
+    p = argparse.ArgumentParser(description="Launch ImageForgeAI web application.")
     p.add_argument("--port", type=int, default=7860)
     p.add_argument("--share", action="store_true")
     args = p.parse_args()

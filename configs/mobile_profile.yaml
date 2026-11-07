@@ -1,0 +1,28 @@
+# Mobile device reference profile
+# Used by budget.py to enforce hardware constraints and label all mobile-proxy results.
+# Every benchmark result that uses this profile must carry the label:
+#   PROXY (CPU, 4 threads) or DEVICE (<model>, <OS>, <delegate>)
+
+device_class: android
+ram_gb: 8
+cpu_cores: 4                    # number of CPU cores (reference thread count)
+delegates: [cpu]                # cpu | nnapi | gpu_delegate
+
+# Working-memory budget for the model (all components combined)
+memory_budget_mb: 1536          # 1.5 GB
+
+# Total on-disk storage budget for all deployed weight files
+storage_budget_mb: 1024         # 1 GB
+
+# Latency target per 512×512 image (end-to-end: encode + denoise + decode)
+latency_target_s: 10.0          # hard target
+latency_stretch_goal_s: 5.0     # stretch goal
+
+# Fallback thresholds — mirrored in fallback.py
+fallback_memory_threshold_mb: 200   # free memory below this triggers fallback
+min_steps: 2                        # minimum steps before erroring out
+min_resolution: [384, 384]          # minimum resolution before erroring out
+
+# ONNX Runtime session options for the proxy benchmark
+onnxruntime_threads: 4
+onnxruntime_execution_providers: [CPUExecutionProvider]

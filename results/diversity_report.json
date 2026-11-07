@@ -1,0 +1,23 @@
+{
+  "prompt": "a photograph of an astronaut riding a horse on the moon",
+  "seeds": [
+    101,
+    202,
+    303,
+    404
+  ],
+  "config": "configs/optimized.yaml",
+  "results": {
+    "mean_lpips": 0.799313465754191,
+    "std_lpips": 0.054763330224822084,
+    "n_pairs": 6,
+    "all_scores": [
+      0.7011,
+      0.8178,
+      0.8777,
+      0.7864,
+      0.8347,
+      0.7781
+    ]
+  }
+}

@@ -1,0 +1,49 @@
+# Environments
+.venv/
+venv/
+ENV/
+env/
+
+# Python & Tool caches
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+*.egg-info/
+.egg-info/
+
+# Large model files & weights (GitHub 100MB limit)
+*.safetensors
+*.bin
+*.pt
+*.pth
+*.onnx
+*.ckpt
+*.h5
+*.npz
+*.incomplete
+models/*
+!models/MANIFEST.json
+
+# Temporary / Scratch scripts & logs
+scratch/
+*.log
+
+# Large evaluation artifacts & benchmark dumps
+results/bench_*/
+results/onnx/
+results/baseline_run/
+results/optimized_run/
+results/test_run/
+results/m1_verification/
+results/diversity_evaluation/
+results/cv_gallery/
+
+# OS / IDE
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

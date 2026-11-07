@@ -1,0 +1,17 @@
+{
+  "max_abs_error": 6.67572021484375e-06,
+  "mean_abs_error": 6.486918664450059e-07,
+  "output_shapes_match": true,
+  "pytorch_shape": [
+    1,
+    4,
+    64,
+    64
+  ],
+  "onnx_shape": [
+    1,
+    4,
+    64,
+    64
+  ]
+}

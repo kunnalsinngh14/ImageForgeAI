@@ -1,0 +1,86 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "t2i"
+version = "0.1.0"
+description = "Resource-Efficient Text-to-Image Generation for Mobile Devices (P3)"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    # Deep learning core
+    "torch>=2.0.0",
+    "torchvision",
+    "diffusers>=0.29.0",
+    "transformers==4.37.2",
+    "tokenizers==0.15.2",
+    "accelerate",
+    "safetensors",
+    "peft",
+
+    # Quantization / export
+    "optimum",
+    "onnxruntime",
+    "onnx",
+
+    # Classical CV
+    "opencv-python-headless",
+    "numpy",
+    "scikit-image",
+    "Pillow",
+
+    # Evaluation
+    "open-clip-torch",
+    "torchmetrics[image]",
+    "pytorch-fid",
+    "pyiqa",
+    "lpips",
+    "psutil",
+
+    # Semantic checks
+    "sentencepiece",
+
+    # App
+    "fastapi",
+    "uvicorn[standard]",
+    "gradio",
+    "jinja2",
+
+    # Data / reporting
+    "pandas",
+    "matplotlib>=3.9.1",
+    "pydantic>=2.0",
+    "pyyaml",
+    "requests",
+    "tqdm",
+    "huggingface-hub",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest==8.3.1",
+    "pytest-cov==5.0.0",
+    "ruff==0.5.4",
+    "black==24.4.2",
+    "mypy==1.10.1",
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.black]
+line-length = 100
+target-version = ["py311"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-v"
+markers = [
+    "mock: mark test to use mock pipeline (no model download needed)",
+    "slow: mark test as slow (requires full model download)",
+]

@@ -1,0 +1,35 @@
+name: optimized
+model:
+  base: runwayml/stable-diffusion-v1-5
+  revision: "1f0baa1d8fd9f5e3b4b7d1d16cd6a6b2a4d8b8c0"  # pinned; see models/MANIFEST.json
+precision: fp16
+scheduler: dpm_solver_pp          # dpm_solver_pp converges in 12-15 steps
+steps: 20                         # high quality sampling
+guidance_scale: 7.5               # standard CFG for high prompt alignment
+resolution: [512, 512]
+variant: dreamshaper_v8           # DreamShaper v8 photorealistic fine-tune
+lcm_lora: false
+quantization: none              # none | int8_dynamic — set at operating-point selection
+attention: sdpa                 # fused scaled_dot_product_attention
+vae_tiling: false
+channels_last: true
+classical_postprocess: true
+cv:
+  resize:
+    mode: none
+    unsharp_radius: 1.0
+    unsharp_amount: 0.5
+  color:
+    clahe_clip: 1.1
+    clahe_tile: [8, 8]
+    white_balance: none
+    vibrance: 0.0
+  edge:
+    guided_radius: 8
+    guided_eps: 0.01
+    detail_scale: 0.15
+  artifacts:
+    fft_peak_threshold: 6.0
+    local_var_threshold: 10.0
+    correct: true
+seed_base: 1234

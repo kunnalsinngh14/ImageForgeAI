@@ -1,0 +1,35 @@
+name: baseline
+model:
+  base: runwayml/stable-diffusion-v1-5
+  revision: "1f0baa1d8fd9f5e3b4b7d1d16cd6a6b2a4d8b8c0"  # pinned; see models/MANIFEST.json
+precision: fp32
+scheduler: ddim                 # ddim | dpm_solver_pp | lcm
+steps: 10
+guidance_scale: 7.5
+resolution: [512, 512]
+variant: block_pruned              # block-pruned proxy for mobile CPU execution
+lcm_lora: false
+quantization: none              # none | fp16 | int8_dynamic | int8_onnx
+attention: default              # default | sdpa | xformers
+vae_tiling: false
+channels_last: false
+classical_postprocess: false
+cv:
+  resize:
+    mode: none                  # none | lanczos_down | bicubic_up | adaptive
+    unsharp_radius: 1.0
+    unsharp_amount: 0.5
+  color:
+    clahe_clip: 2.0
+    clahe_tile: [8, 8]
+    white_balance: gray_world   # gray_world | percentile
+    vibrance: 0.0
+  edge:
+    guided_radius: 8
+    guided_eps: 0.01
+    detail_scale: 0.3
+  artifacts:
+    fft_peak_threshold: 6.0
+    local_var_threshold: 10.0
+    correct: false
+seed_base: 1234

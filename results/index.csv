@@ -1,0 +1,4 @@
+run_id,config_name,date,git_commit,hardware,path
+20261107_033928_a113603978a9,baseline,2026-11-07,HEAD,"PROXY (CPU, 4 threads)",results\baseline_run\20261107_033928_a113603978a9\benchmark_results.json
+20261107_033539_a15baf2c95d7,optimized,2026-11-07,HEAD,"PROXY (CPU, 4 threads)",results\optimized_run\20261107_033539_a15baf2c95d7\benchmark_results.json
+bench_20261107_065523_a15baf2c95d7,optimized,2026-11-07,unknown,"NVIDIA GeForce GTX 1050 (CUDA, cuda)",results\bench_20261107_065523_a15baf2c95d7\benchmark_results.json

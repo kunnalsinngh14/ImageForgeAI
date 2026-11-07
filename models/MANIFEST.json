@@ -1,0 +1,45 @@
+{
+  "models": [
+    {
+      "component": "stable-diffusion-v1-5",
+      "hub_id": "runwayml/stable-diffusion-v1-5",
+      "revision": "main",
+      "local_dir": "stable-diffusion-v1-5",
+      "license": "CreativeML OpenRAIL-M",
+      "license_url": "https://huggingface.co/spaces/CompVis/stable-diffusion-license",
+      "notes": "OpenRAIL-M: restrictions include no generation of harmful or deceptive content. See docs/licenses/openrail-m.md.",
+      "files": {
+        "stable-diffusion-v1-5\\text_encoder\\model.fp16.safetensors": "77795e2023adcf39bc29a884661950380bd093cf0750a966d473d1718dc9ef4e",
+        "stable-diffusion-v1-5\\text_encoder\\model.safetensors": "d008943c017f0092921106440254dbbe00b6a285f7883ec8ba160c3faad88334",
+        "stable-diffusion-v1-5\\unet\\diffusion_pytorch_model.fp16.safetensors": "c83908253f9a64d08c25fc90874c9c8aef9a329ce1ca5fb909d73b0c83d1ea21",
+        "stable-diffusion-v1-5\\unet\\diffusion_pytorch_model.safetensors": "19da7aaa4b880e59d56843f1fcb4dd9b599c28a1d9d9af7c1143057c8ffae9f1",
+        "stable-diffusion-v1-5\\vae\\diffusion_pytorch_model.fp16.safetensors": "4fbcf0ebe55a0984f5a5e00d8c4521d52359af7229bb4d81890039d2aa16dd7c",
+        "stable-diffusion-v1-5\\vae\\diffusion_pytorch_model.safetensors": "a2b5134f4dbc140d9c11f11cba3233099e00af40f262f136c691fb7d38d2194c"
+      }
+    },
+    {
+      "component": "lcm-lora-sdv1-5",
+      "hub_id": "latent-consistency/lcm-lora-sdv1-5",
+      "revision": "main",
+      "local_dir": "lcm-lora-sdv1-5",
+      "license": "OpenRAIL++",
+      "license_url": "https://huggingface.co/latent-consistency/lcm-lora-sdv1-5",
+      "notes": "LCM-LoRA for SD v1.5 \u2014 2\u20138 step sampling.",
+      "files": {
+        "lcm-lora-sdv1-5\\pytorch_lora_weights.safetensors": "8f90d840e075ff588a58e22c6586e2ae9a6f7922996ee6649a7f01072333afe4"
+      }
+    },
+    {
+      "component": "bk-sdm-small",
+      "hub_id": "nota-ai/bk-sdm-small",
+      "revision": "main",
+      "local_dir": "bk-sdm-small",
+      "license": "CreativeML OpenRAIL-M",
+      "license_url": "https://huggingface.co/nota-ai/bk-sdm-small",
+      "notes": "Block-pruned distilled U-Net variant.",
+      "files": {
+        "bk-sdm-small\\unet\\diffusion_pytorch_model.safetensors": "926b7327291c79a1bb56f1e416342f8981bf45933f827437c5be498b16aef937"
+      }
+    }
+  ]
+}

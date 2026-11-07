@@ -1,101 +1,997 @@
-@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+
+/* ==========================================================================
+   Apple Pro Studio Monochromatic Workstation Theme & Motion Suite
+   Zero gradients · Zero purple/violet · Deep blacks · Tactile micro-motion
+   ========================================================================== */
+
 :root {
-  --bg-dark: #000000;
-  --bg-card: rgba(14, 14, 16, 0.72);
-  --border-subtle: rgba(255, 255, 255, 0.08);
-  --border-active: rgba(255, 255, 255, 0.22);
-  --text-primary: #f5f5f7;
-  --text-muted: #86868b;
+    --canvas-bg: #000000;
+    --panel-bg: rgba(20, 24, 32, 0.65);
+    --panel-surface: #0e1117;
+    --panel-border: rgba(255, 255, 255, 0.08);
+    --panel-border-focus: rgba(255, 255, 255, 0.32);
+    --input-bg: #090b0f;
+    --text-primary: #f5f5f7;
+    --text-secondary: #86868b;
+    --text-tertiary: #515154;
+    --accent-btn-bg: #ffffff;
+    --accent-btn-text: #000000;
+    --accent-btn-hover: #f0f0f2;
+    --accent-pill-active: rgba(255, 255, 255, 0.12);
+    --accent-pill-border: rgba(255, 255, 255, 0.22);
+    
+    /* Neutralize all Gradio default purple/violet/indigo palette */
+    --primary-50: #f5f5f7;
+    --primary-100: #e5e5ea;
+    --primary-200: #d1d1d6;
+    --primary-300: #c7c7cc;
+    --primary-400: #aeaeb2;
+    --primary-500: #ffffff;
+    --primary-600: #f5f5f7;
+    --primary-700: #e5e5ea;
+    --primary-800: #d1d1d6;
+    --primary-900: #1c1c1e;
+    --primary-950: #000000;
+    --color-indigo-500: #ffffff;
+    --color-violet-500: #ffffff;
+    --color-purple-500: #ffffff;
+    --ring-color: rgba(255, 255, 255, 0.25) !important;
 }
-* {
-  box-sizing: border-box;
-}
+
+/* ==========================================================================
+   Full-Viewport Monochromatic Architectural Ambient Aurora
+   Off-thread GPU composite · Zero CPU overhead · 22s whisper breathing drift
+   ========================================================================== */
+
 body {
-  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
-  background-color: var(--bg-dark);
-  color: var(--text-primary);
-  overflow-x: hidden;
-  position: relative;
+    position: relative;
+    background-color: var(--canvas-bg) !important;
+    overflow-x: hidden;
+    color: var(--text-primary) !important;
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif !important;
+    -webkit-font-smoothing: antialiased;
+    letter-spacing: -0.01em;
 }
-.mono {
-  font-family: 'JetBrains Mono', monospace;
+
+body::before,
+body::after {
+    content: "";
+    position: fixed;
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 0;
+    will-change: transform, opacity;
 }
+
+/* Primary Ambient Aurora Orb (Top-Right Silver Luminescence) */
 body::before {
-  content: "";
-  position: fixed;
-  inset: -20%;
-  pointer-events: none;
-  background:
-    radial-gradient(circle at 20% 15%, rgba(255, 255, 255, 0.05) 0%, transparent 40%),
-    radial-gradient(circle at 80% 30%, rgba(200, 220, 255, 0.04) 0%, transparent 50%),
-    radial-gradient(circle at 50% 85%, rgba(180, 200, 240, 0.04) 0%, transparent 60%);
-  filter: blur(48px);
-  z-index: 0;
-  animation: aurora-drift 24s ease-in-out infinite alternate;
+    top: -15vh;
+    right: -5vw;
+    width: 60vw;
+    height: 60vw;
+    background: radial-gradient(
+        circle,
+        rgba(255, 255, 255, 0.16) 0%,
+        rgba(210, 225, 245, 0.08) 35%,
+        rgba(150, 175, 210, 0.03) 60%,
+        transparent 75%
+    );
+    filter: blur(48px);
+    animation: auroraDriftOne 13s cubic-bezier(0.4, 0, 0.2, 1) infinite alternate;
 }
-@keyframes aurora-drift {
-  0% { transform: scale(1) translate(0, 0); }
-  50% { transform: scale(1.05) translate(-1%, 2%); }
-  100% { transform: scale(0.98) translate(2%, -1%); }
+
+/* Secondary Ambient Aurora Orb (Bottom-Left Deep Slate Drift) */
+body::after {
+    bottom: -20vh;
+    left: -10vw;
+    width: 70vw;
+    height: 70vw;
+    background: radial-gradient(
+        circle,
+        rgba(255, 255, 255, 0.13) 0%,
+        rgba(180, 200, 230, 0.06) 40%,
+        rgba(120, 140, 180, 0.02) 65%,
+        transparent 80%
+    );
+    filter: blur(56px);
+    animation: auroraDriftTwo 17s cubic-bezier(0.4, 0, 0.2, 1) infinite alternate;
 }
-.liquid-chrome {
-  background: linear-gradient(135deg, #ffffff 0%, #a1a1aa 45%, #ffffff 70%, #71717a 100%);
-  background-size: 200% auto;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  animation: chrome-sweep 4s linear infinite;
+
+@keyframes auroraDriftOne {
+    0% {
+        transform: translate3d(0, 0, 0) scale(1);
+        opacity: 0.75;
+    }
+    50% {
+        transform: translate3d(-10vw, 12vh, 0) scale(1.18);
+        opacity: 1;
+    }
+    100% {
+        transform: translate3d(6vw, 8vh, 0) scale(0.92);
+        opacity: 0.85;
+    }
 }
-@keyframes chrome-sweep {
-  to { background-position: 200% center; }
+
+@keyframes auroraDriftTwo {
+    0% {
+        transform: translate3d(0, 0, 0) scale(1);
+        opacity: 0.7;
+    }
+    50% {
+        transform: translate3d(12vw, -10vh, 0) scale(1.22);
+        opacity: 1;
+    }
+    100% {
+        transform: translate3d(-6vw, -6vh, 0) scale(0.9);
+        opacity: 0.8;
+    }
 }
-.glass-panel {
-  background: var(--bg-card);
-  backdrop-filter: blur(24px) saturate(180%);
-  -webkit-backdrop-filter: blur(24px) saturate(180%);
-  border: 1px solid var(--border-subtle);
-  border-radius: 16px;
-  transition: border-color 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+
+.gradio-container {
+    position: relative;
+    z-index: 1;
+    background-color: transparent !important;
 }
-.glass-panel:hover {
-  border-color: var(--border-active);
+
+/* App Header - Precision Workstation Style */
+.app-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 24px;
+    background: var(--panel-bg);
+    backdrop-filter: blur(24px) saturate(180%);
+    -webkit-backdrop-filter: blur(24px) saturate(180%);
+    border: 1px solid var(--panel-border);
+    border-radius: 10px;
+    margin-bottom: 16px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
 }
-.btn-primary {
-  background-color: #ffffff;
-  color: #000000;
-  font-weight: 600;
-  transition: transform 0.1s ease, background-color 0.2s ease, box-shadow 0.2s ease;
-  box-shadow: 0 0 20px rgba(255, 255, 255, 0.15);
+
+/* Portfolio-Caliber Brand Identity */
+.app-brand-portfolio {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    cursor: default;
+    user-select: none;
 }
-.btn-primary:hover {
-  background-color: #f0f0f2;
-  box-shadow: 0 0 28px rgba(255, 255, 255, 0.28);
+
+.brand-glyph-box {
+    position: relative;
+    width: 38px;
+    height: 38px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-radius: 9px;
+    transition: transform 300ms cubic-bezier(0.16, 1, 0.3, 1), border-color 300ms ease;
 }
-.btn-primary:active {
-  transform: scale(0.98);
+
+.brand-glyph {
+    width: 22px;
+    height: 22px;
+    color: #ffffff;
+    filter: drop-shadow(0 0 6px rgba(255, 255, 255, 0.45));
+    transition: transform 500ms cubic-bezier(0.16, 1, 0.3, 1);
 }
-.radar-beacon {
-  position: relative;
+
+.glyph-glow {
+    position: absolute;
+    inset: -3px;
+    border-radius: 11px;
+    background: radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.18), transparent 70%);
+    opacity: 0;
+    transition: opacity 300ms ease;
+    pointer-events: none;
 }
-.radar-beacon::after {
-  content: "";
-  position: absolute;
-  inset: -3px;
-  border-radius: 9999px;
-  border: 1px solid #10b981;
-  opacity: 0.8;
-  animation: beacon-ping 2s cubic-bezier(0, 0, 0.2, 1) infinite;
+
+.app-brand-portfolio:hover .brand-glyph-box {
+    transform: scale(1.06);
+    border-color: rgba(255, 255, 255, 0.4);
 }
-@keyframes beacon-ping {
-  0% { transform: scale(1); opacity: 0.8; }
-  100% { transform: scale(2.4); opacity: 0; }
+
+.app-brand-portfolio:hover .brand-glyph {
+    transform: rotate(30deg);
 }
-.image-reveal {
-  animation: img-fade 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+
+.app-brand-portfolio:hover .glyph-glow {
+    opacity: 1;
 }
-@keyframes img-fade {
-  from { opacity: 0; transform: scale(0.985); }
-  to { opacity: 1; transform: scale(1); }
+
+.brand-text-col {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
 }
+
+.brand-title-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* Flashy Portfolio Typography with Liquid Chrome Glint */
+@keyframes chromeShine {
+    0% {
+        background-position: -200% 0;
+    }
+    100% {
+        background-position: 200% 0;
+    }
+}
+
+.portfolio-logo {
+    font-size: 21px;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    background: linear-gradient(
+        105deg,
+        rgba(255, 255, 255, 0.45) 0%,
+        rgba(255, 255, 255, 0.5) 25%,
+        #ffffff 50%,
+        rgba(255, 255, 255, 0.5) 75%,
+        rgba(255, 255, 255, 0.45) 100%
+    );
+    background-size: 250% 100%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: chromeShine 3.2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+    transition: letter-spacing 300ms cubic-bezier(0.16, 1, 0.3, 1), filter 300ms ease;
+    display: inline-block;
+}
+
+.portfolio-logo .logo-accent {
+    font-weight: 300;
+    letter-spacing: 0.08em;
+    -webkit-text-fill-color: inherit;
+    text-shadow: 0 0 16px rgba(255, 255, 255, 0.5);
+}
+
+.app-brand-portfolio:hover .portfolio-logo {
+    letter-spacing: 0.06em;
+    filter: drop-shadow(0 0 18px rgba(255, 255, 255, 0.45));
+}
+
+.portfolio-badge {
+    font-size: 9.5px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #000000;
+    background: #ffffff;
+    border-radius: 4px;
+    padding: 2px 6px;
+    box-shadow: 0 1px 4px rgba(255, 255, 255, 0.25);
+    line-height: 1.2;
+}
+
+.brand-sub-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 11px;
+}
+
+.portfolio-meta {
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    color: #86868b;
+    text-transform: uppercase;
+}
+
+.meta-dot {
+    color: rgba(255, 255, 255, 0.2);
+}
+
+.portfolio-desc {
+    color: #a1a1aa;
+    font-size: 11.5px;
+}
+
+/* Portfolio Hardware Pill with Active Radar Ping */
+.hw-tag-portfolio {
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    font-size: 11.5px;
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    color: var(--text-secondary);
+    background: #090b0f;
+    border: 1px solid var(--panel-border);
+    border-radius: 20px;
+    padding: 5px 14px;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+.hw-beacon {
+    position: relative;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #10b981;
+    box-shadow: 0 0 8px #10b981;
+    display: inline-block;
+}
+
+.hw-beacon::after {
+    content: "";
+    position: absolute;
+    inset: -2px;
+    border-radius: 50%;
+    border: 1.5px solid #10b981;
+    animation: beaconPing 2s cubic-bezier(0, 0, 0.2, 1) infinite;
+}
+
+@keyframes beaconPing {
+    0% {
+        transform: scale(0.9);
+        opacity: 0.9;
+    }
+    70%, 100% {
+        transform: scale(2.6);
+        opacity: 0;
+    }
+}
+
+/* Primary Action Button - Apple Monochrome Studio (Crisp solid white, bold black text, physical spring press) */
+.primary-action-btn {
+    background: var(--accent-btn-bg) !important;
+    color: var(--accent-btn-text) !important;
+    font-weight: 600 !important;
+    font-size: 13.5px !important;
+    letter-spacing: -0.01em !important;
+    border: 1px solid rgba(255, 255, 255, 0.9) !important;
+    border-radius: 6px !important;
+    padding: 10px 18px !important;
+    cursor: pointer !important;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.9) !important;
+    transition: transform 90ms cubic-bezier(0.2, 0.8, 0.2, 1), background-color 140ms ease, box-shadow 140ms ease !important;
+}
+
+.primary-action-btn:hover {
+    background: var(--accent-btn-hover) !important;
+    box-shadow: 0 2px 8px rgba(255, 255, 255, 0.15), inset 0 1px 0 rgba(255, 255, 255, 1) !important;
+}
+
+.primary-action-btn:active {
+    transform: scale(0.98) !important;
+    background: #e2e2e5 !important;
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.2) !important;
+}
+
+/* Form Controls - Subtle hairline borders, zero neon, high-contrast crisp text */
+textarea, input[type="text"], input[type="number"], select {
+    background-color: var(--input-bg) !important;
+    border: 1px solid var(--panel-border) !important;
+    border-radius: 6px !important;
+    color: var(--text-primary) !important;
+    font-size: 13px !important;
+    transition: border-color 150ms ease, box-shadow 150ms ease !important;
+}
+
+textarea:focus, input:focus, select:focus {
+    border-color: var(--panel-border-focus) !important;
+    box-shadow: 0 0 0 1px var(--panel-border-focus) !important;
+    outline: none !important;
+}
+
+/* Segmented Control Styling for Mode Selector (Apple macOS segmented pill style) */
+.gradio-radio .wrap {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 4px !important;
+    background: rgba(255, 255, 255, 0.04) !important;
+    border: 1px solid var(--panel-border) !important;
+    border-radius: 8px !important;
+    padding: 4px !important;
+}
+
+.gradio-radio label {
+    display: flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    padding: 6px 14px !important;
+    border-radius: 6px !important;
+    font-size: 12.5px !important;
+    font-weight: 500 !important;
+    color: var(--text-secondary) !important;
+    cursor: pointer !important;
+    border: 1px solid transparent !important;
+    background: transparent !important;
+    transition: all 120ms cubic-bezier(0.2, 0.8, 0.2, 1) !important;
+}
+
+.gradio-radio label:hover {
+    color: var(--text-primary) !important;
+    background: rgba(255, 255, 255, 0.05) !important;
+}
+
+.gradio-radio label.selected,
+.gradio-radio label:has(input:checked) {
+    background: var(--accent-pill-active) !important;
+    color: #ffffff !important;
+    border-color: var(--accent-pill-border) !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3) !important;
+}
+
+.gradio-radio input[type="radio"] {
+    appearance: none !important;
+    -webkit-appearance: none !important;
+    width: 0 !important;
+    height: 0 !important;
+    margin: 0 !important;
+    opacity: 0 !important;
+    position: absolute !important;
+}
+
+/* Slider Neutral Apple Styling */
 input[type="range"] {
+    accent-color: #ffffff !important;
+}
+
+/* Status Monitor Bar with ambient breathing state indicator */
+.status-monitor {
+    background: var(--input-bg) !important;
+    border: 1px solid var(--panel-border) !important;
+    border-radius: 6px !important;
+    color: var(--text-secondary) !important;
+    font-size: 12px !important;
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace !important;
+    padding: 8px 12px !important;
+    transition: border-color 200ms ease, box-shadow 200ms ease !important;
+}
+
+.status-monitor textarea {
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace !important;
+    font-size: 12px !important;
+    color: var(--text-secondary) !important;
+}
+
+@keyframes appleBreathingGlow {
+    0%, 100% {
+        border-color: rgba(255, 255, 255, 0.08);
+        box-shadow: 0 0 0 0 rgba(255, 255, 255, 0);
+    }
+    50% {
+        border-color: rgba(255, 255, 255, 0.28);
+        box-shadow: 0 0 12px 0 rgba(255, 255, 255, 0.06);
+    }
+}
+
+.status-monitor:focus-within {
+    animation: appleBreathingGlow 2.4s ease-in-out infinite !important;
+}
+
+/* Image Output Canvas & Physical Entrance Reveal Animation */
+.apple-image-canvas,
+.gradio-image {
+    background: #07080a !important;
+    border: 1px solid var(--panel-border) !important;
+    border-radius: 8px !important;
+    overflow: hidden !important;
+    transition: border-color 150ms ease !important;
+}
+
+@keyframes appleReveal {
+    0% {
+        opacity: 0;
+        transform: scale(0.985);
+        filter: blur(2px);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1);
+        filter: blur(0);
+    }
+}
+
+.apple-image-canvas img,
+.image-reveal img,
+.gradio-image img {
+    animation: appleReveal 280ms cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
+    border-radius: 6px !important;
+}
+
+/* Telemetry & Stage Timings */
+.telemetry-bar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 14px;
+    background: var(--panel-bg);
+    border: 1px solid var(--panel-border);
+    border-radius: 6px;
+    font-size: 12px;
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    font-variant-numeric: tabular-nums;
+    margin-top: 8px;
+}
+
+.telemetry-item {
+    display: inline-flex;
+    gap: 5px;
+}
+
+.telemetry-k {
+    color: var(--text-secondary);
+}
+
+.telemetry-v {
+    color: #ffffff;
+    font-weight: 500;
+}
+
+.telemetry-sep {
+    color: var(--panel-border);
+}
+
+.stage-timing-row {
+    display: flex;
+    gap: 16px;
+    font-size: 11px;
+    color: var(--text-tertiary);
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    font-variant-numeric: tabular-nums;
+    padding: 4px 6px;
+}
+
+/* Tabs - Apple macOS Segmented Header */
+.tab-nav {
+    border-bottom: 1px solid var(--panel-border) !important;
+    margin-bottom: 16px !important;
+}
+
+.tab-nav button {
+    font-size: 13px !important;
+    font-weight: 500 !important;
+    padding: 8px 16px !important;
+    color: var(--text-secondary) !important;
+    border: none !important;
+    background: transparent !important;
+    transition: color 140ms ease, border-color 140ms ease !important;
+}
+
+.tab-nav button:hover {
+    color: var(--text-primary) !important;
+}
+
+.tab-nav button.selected {
+    color: #ffffff !important;
+    border-bottom: 2px solid #ffffff !important;
+    background: transparent !important;
+}
+
+/* Dashboard Unified Stat Strip */
+.stat-strip {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    background: var(--panel-bg);
+    backdrop-filter: blur(24px) saturate(180%);
+    border: 1px solid var(--panel-border);
+    border-radius: 8px;
+    margin-bottom: 20px;
+    overflow: hidden;
+}
+
+.stat-cell {
+    padding: 16px 20px;
+    border-right: 1px solid var(--panel-border);
+}
+
+.stat-cell:last-child {
+    border-right: none;
+}
+
+.stat-label {
+    font-size: 11px;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin-bottom: 4px;
+}
+
+.stat-value {
+    font-size: 24px;
+    font-weight: 600;
+    color: #ffffff;
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.02em;
+}
+
+.stat-context {
+    font-size: 11.5px;
+    color: var(--text-tertiary);
+    margin-top: 4px;
+}
+
+/* Comparison Container */
+.benchmark-container {
+    background: var(--panel-bg);
+    border: 1px solid var(--panel-border);
+    border-radius: 8px;
+    padding: 18px 20px;
+    margin-bottom: 18px;
+}
+
+.benchmark-heading {
+    font-size: 13.5px;
+    font-weight: 600;
+    color: #ffffff;
+    letter-spacing: -0.01em;
+    margin-bottom: 14px;
+}
+
+.benchmark-row {
+    margin-bottom: 12px;
+}
+
+.benchmark-labels {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    margin-bottom: 4px;
+}
+
+.benchmark-track {
+    width: 100%;
+    height: 6px;
+    background: var(--input-bg);
+    border: 1px solid var(--panel-border);
+    border-radius: 3px;
+    overflow: hidden;
+}
+
+.benchmark-fill-orange {
+    height: 100%;
+    background: #ffffff;
+    border-radius: 2px;
+}
+
+.benchmark-fill-green {
+    height: 100%;
+    background: #10b981;
+    border-radius: 2px;
+}
+
+.benchmark-fill-neutral {
+    height: 100%;
+    background: #515154;
+    border-radius: 2px;
+}
+
+.benchmark-fill-red {
+    height: 100%;
+    background: #ef4444;
+    border-radius: 2px;
+}
+
+/* Clean Ruled Table */
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    margin-top: 8px;
+}
+
+.data-table th {
+    text-align: left;
+    padding: 8px 12px;
+    font-size: 11.5px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    border-bottom: 1px solid var(--panel-border);
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+}
+
+.data-table td {
+    padding: 10px 12px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+    color: var(--text-primary);
+}
+
+.data-table td.num {
+    text-align: right;
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    font-variant-numeric: tabular-nums;
+}
+
+.data-table th.num {
+    text-align: right;
+}
+
+/* Accessibility: Reduced motion query */
+@media (prefers-reduced-motion: reduce) {
+    *, ::before, ::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+}
+
+/* Image Canvas Toolbar & Download Button */
+.apple-image-canvas button,
+.apple-image-canvas a[download],
+.apple-image-canvas [aria-label*="Download"],
+.apple-image-canvas [aria-label*="download"],
+.apple-image-canvas [title*="Download"],
+.apple-image-canvas [title*="download"],
+.gradio-image button,
+.gradio-image a[download] {
+    display: inline-flex !important;
+    visibility: visible !important;
+    opacity: 0.9 !important;
+    pointer-events: auto !important;
+    background: rgba(20, 24, 32, 0.85) !important;
+    backdrop-filter: blur(12px) !important;
+    border: 1px solid rgba(255, 255, 255, 0.16) !important;
+    border-radius: 6px !important;
+    color: #ffffff !important;
+    transition: opacity 120ms ease, background-color 120ms ease, transform 80ms ease !important;
+}
+
+.apple-image-canvas button:hover,
+.apple-image-canvas a[download]:hover {
+    opacity: 1 !important;
+    background: rgba(35, 42, 55, 0.95) !important;
+    border-color: rgba(255, 255, 255, 0.35) !important;
+}
+
+.apple-image-canvas button:active,
+.apple-image-canvas a[download]:active {
+    transform: scale(0.96) !important;
+}
+
+/* Complete Footer, API links, and Settings Removal */
+footer,
+body footer,
+.gradio-container footer,
+div footer,
+a[href*="gradio.app"],
+footer a,
+[data-testid="show-api"],
+.show-api {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    height: 0 !important;
+    max-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+    pointer-events: none !important;
+}
+
+
+/* Gradio Tab Bar Replica */
+.tab-nav {
+  display: flex;
+  gap: 8px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  margin-bottom: 24px;
+  padding: 0 4px;
+}
+.tab-btn {
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: #86868b;
+  font-size: 13px;
+  font-weight: 500;
+  padding: 10px 18px;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.tab-btn:hover {
+  color: #f5f5f7;
+}
+.tab-btn.active {
+  color: #ffffff;
+  border-bottom: 2px solid #ffffff;
+}
+
+/* Layout Columns */
+.gradio-row {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 24px;
+}
+@media (min-width: 900px) {
+  .gradio-row {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+.gradio-col {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* Form Controls matching Gradio */
+.gr-box {
+  background: rgba(20, 24, 32, 0.65);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  padding: 12px 14px;
+  transition: border-color 0.2s;
+}
+.gr-box:focus-within {
+  border-color: rgba(255, 255, 255, 0.32);
+}
+.gr-label {
+  display: block;
+  font-size: 11px;
+  font-weight: 600;
+  color: #86868b;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 6px;
+}
+.gr-info {
+  display: block;
+  font-size: 11px;
+  color: #515154;
+  margin-top: 6px;
+  line-height: 1.4;
+}
+.gr-input, .gr-textarea, .gr-select {
+  width: 100%;
+  background: transparent;
+  border: none;
+  color: #f5f5f7;
+  font-size: 13px;
+  font-family: inherit;
+  outline: none;
+  resize: none;
+}
+.gr-select {
+  cursor: pointer;
+}
+.gr-select option {
+  background: #0e1117;
+  color: #f5f5f7;
+}
+
+/* Radio Pill Group */
+.radio-pill-group {
+  display: flex;
+  gap: 6px;
+  margin-top: 4px;
+}
+.radio-pill {
+  flex: 1;
+  text-align: center;
+  padding: 8px 12px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 8px;
+  color: #86868b;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.radio-pill:hover {
+  color: #f5f5f7;
+  border-color: rgba(255, 255, 255, 0.15);
+}
+.radio-pill.active {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.28);
+  color: #ffffff;
+  font-weight: 600;
+}
+
+/* Collapsible Accordion */
+.gr-accordion {
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  background: rgba(20, 24, 32, 0.45);
+  overflow: hidden;
+}
+.gr-accordion-header {
+  padding: 12px 16px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #86868b;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  user-select: none;
+}
+.gr-accordion-header:hover {
+  color: #f5f5f7;
+}
+.gr-accordion-body {
+  padding: 14px 16px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/* Canvas Toolbar */
+.image-toolbar {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  display: flex;
+  gap: 6px;
+  z-index: 10;
+}
+.toolbar-btn {
+  background: rgba(20, 24, 32, 0.75);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 8px;
+  color: #f5f5f7;
+  padding: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s;
+}
+.toolbar-btn:hover {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.canvas-frame {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1;
+  background: #000000;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.canvas-frame img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+/* Sliders */
+input[type="range"] {
+  width: 100%;
   accent-color: #ffffff;
+  cursor: pointer;
+}
+.slider-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  color: #86868b;
+  margin-bottom: 4px;
+}
+.slider-val {
+  font-family: 'JetBrains Mono', monospace;
+  color: #ffffff;
+  font-weight: 600;
+}
+
+/* Code block */
+pre.gr-code {
+  background: #090b0f;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  padding: 12px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: #10b981;
+  overflow-x: auto;
+  white-space: pre-wrap;
 }

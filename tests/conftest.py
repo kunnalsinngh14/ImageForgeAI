@@ -1,6 +1,5 @@
 """Pytest configuration and custom flags."""
 
-import pytest
 
 
 def pytest_addoption(parser):

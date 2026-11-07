@@ -19,8 +19,6 @@ def test_clahe_shape_preserved(sample_image):
 
 def test_clahe_increases_contrast(sample_image):
     out = apply_clahe(sample_image, clip_limit=3.0)
-    # CLAHE should generally increase or maintain std of pixel values
-    orig_std = sample_image[:, :, 0].std()
     # We just check output is valid; contrast change is not guaranteed to increase
     assert out.min() >= 0 and out.max() <= 255
 

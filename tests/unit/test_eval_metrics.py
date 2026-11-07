@@ -1,8 +1,4 @@
 """Tests for evaluation modules (size, memory, clip_score, etc.)."""
-from pathlib import Path
-import numpy as np
-import pytest
-import torch
 
 from t2i.eval.size import measure_component_sizes, onnx_export_size_mb
 from t2i.eval.memory import RSSPoller, measure_peak_cpu_memory_mib
@@ -39,7 +35,7 @@ def test_onnx_export_size(tmp_path):
 def test_rss_poller():
     with RSSPoller(interval_ms=10) as poller:
         # Allocate some small memory
-        arr = [0] * 100000
+        _ = [0] * 100000
     assert poller.peak_mib > 0.0
 
 

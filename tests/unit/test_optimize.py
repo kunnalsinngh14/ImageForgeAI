@@ -1,6 +1,5 @@
 """Tests for optimize modules (quantization, pruning, ONNX helpers)."""
 
-import pytest
 import torch
 import torch.nn as nn
 

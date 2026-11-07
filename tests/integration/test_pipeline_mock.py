@@ -140,10 +140,8 @@ def test_decoder_output_shape():
 def test_denoiser_step_count():
     """Denoiser must execute exactly the configured number of steps."""
     from t2i.pipeline.denoiser import Denoiser
-    from diffusers import DDIMScheduler
 
     unet = MockUNet().eval()
-    scheduler = DDIMScheduler()
     denoiser = Denoiser(unet, "ddim", num_inference_steps=5, device="cpu")
 
     latents = torch.zeros(1, 4, 8, 8)

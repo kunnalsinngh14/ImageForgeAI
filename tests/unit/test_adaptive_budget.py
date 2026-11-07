@@ -1,6 +1,5 @@
 """Tests for t2i.adaptive.budget module."""
-import pytest
-from t2i.adaptive.budget import ProfileEntry, select_config, BudgetResult
+from t2i.adaptive.budget import ProfileEntry, select_config
 
 
 def _make_profile(config_id, latency, memory, clip_score) -> ProfileEntry:

@@ -1,7 +1,6 @@
 """Tests for t2i.adaptive.fallback module."""
-import pytest
 from t2i.config import T2IConfig, ModelConfig
-from t2i.adaptive.fallback import apply_fallback_chain, FallbackResult
+from t2i.adaptive.fallback import apply_fallback_chain
 
 
 def _base_config(**overrides) -> T2IConfig:
@@ -61,8 +60,6 @@ def test_no_fallback_needed_when_memory_ok(monkeypatch):
 def test_fallback_step1_reduces_resolution(monkeypatch):
     """Step 1 must reduce resolution to 384×384."""
     import t2i.adaptive.fallback as fb_module
-
-    call_count = [0]
 
     def mock_avail():
         # First call: memory OK to enter chain (> threshold)
